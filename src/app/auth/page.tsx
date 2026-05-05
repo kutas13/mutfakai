@@ -54,6 +54,18 @@ function AuthFormInner() {
           return;
         }
         if (data.user) {
+          const { error: signInErr } = await supabase.auth.signInWithPassword({
+            email: email.trim(),
+            password,
+          });
+          if (!signInErr) {
+            router.push(next);
+            router.refresh();
+            return;
+          }
+
+          // If Supabase email confirmation is enabled in dashboard, instant login is blocked.
+          // We still show account created message so user sees a successful signup.
           setSuccessInfo(t.auth.accountCreated);
           setMode("login");
           return;

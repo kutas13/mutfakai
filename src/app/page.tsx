@@ -7,7 +7,84 @@ const card =
   "flex h-full flex-col rounded-2xl border border-[#2D5A27]/12 bg-white p-6 shadow-sm transition hover:border-[#F28C28]/40 hover:shadow-md";
 
 export default function HomePage() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+
+  const stats =
+    lang === "tr"
+      ? [
+          { label: "Aktif tarif akışı", value: "Canlı AI" },
+          { label: "Desteklenen birim", value: "8+" },
+          { label: "Mobil uyum", value: "%100" },
+          { label: "Dil desteği", value: "TR / EN" },
+        ]
+      : [
+          { label: "Recipe workflow", value: "Live AI" },
+          { label: "Supported units", value: "8+" },
+          { label: "Mobile readiness", value: "100%" },
+          { label: "Languages", value: "TR / EN" },
+        ];
+
+  const featureBlocks =
+    lang === "tr"
+      ? [
+          {
+            title: "Akıllı Dolap Yönetimi",
+            desc: "Malzemelerini hızlıca ekle, kategori ve birim dönüşümü ile düzenli bir stok görünümü elde et.",
+          },
+          {
+            title: "Ne Pişirsem? Sandbox",
+            desc: "Seçtiğin malzemelere göre anında fikir kartları al; tek tıkla kişi sayısına göre tam tarife geç.",
+          },
+          {
+            title: "Premium Diyet Asistanı",
+            desc: "Boy, kilo, yaş, cinsiyet ve aktiviteye göre BMR/TDEE temelli günlük plan üret.",
+          },
+        ]
+      : [
+          {
+            title: "Smart Pantry Management",
+            desc: "Add ingredients quickly and keep stock structured with category and unit conversions.",
+          },
+          {
+            title: "What Should I Cook? Sandbox",
+            desc: "Get instant idea cards from selected ingredients, then jump to a serving-scaled full recipe.",
+          },
+          {
+            title: "Premium Diet Assistant",
+            desc: "Generate BMR/TDEE based daily plans from height, weight, age, gender and activity.",
+          },
+        ];
+
+  const faqs =
+    lang === "tr"
+      ? [
+          {
+            q: "Tarifi yazdıktan sonra malzeme düşümü otomatik mi?",
+            a: "Stok düşümü kullanıcı onayı ile 'Yemeği Pişir' adımında yapılır.",
+          },
+          {
+            q: "Aynı hesabı telefonda ve bilgisayarda kullanabilir miyim?",
+            a: "Evet, oturum açtığında aynı dolap verileri tüm cihazlarda görünür.",
+          },
+          {
+            q: "Diyet planı neden Premium?",
+            a: "Kişiye özel hesaplama ve AI maliyetleri nedeniyle bu özellik Premium akışında tutulur.",
+          },
+        ]
+      : [
+          {
+            q: "Is stock deduction automatic after recipe generation?",
+            a: "Deduction happens on user confirmation at the 'Cook It' step.",
+          },
+          {
+            q: "Can I use the same account on mobile and desktop?",
+            a: "Yes. Once logged in, your pantry data syncs across devices.",
+          },
+          {
+            q: "Why is diet planning premium-only?",
+            a: "Personalized calculations and AI costs are covered through the Premium flow.",
+          },
+        ];
 
   return (
     <div className="text-[#1c1917]">
@@ -77,6 +154,44 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-4 pb-6 sm:px-6">
+        <div className="grid gap-3 rounded-3xl border border-[#2D5A27]/10 bg-white p-4 shadow-sm sm:grid-cols-4 sm:gap-4 sm:p-6">
+          {stats.map((item) => (
+            <div key={item.label} className="rounded-2xl bg-[#faf8f5] p-4 text-center">
+              <p className="text-xl font-bold text-[#2D5A27]">{item.value}</p>
+              <p className="mt-1 text-xs text-neutral-600">{item.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="grid gap-6 lg:grid-cols-3">
+          {featureBlocks.map((f) => (
+            <article key={f.title} className={card}>
+              <h3 className="text-lg font-semibold text-[#2D5A27]">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-600">{f.desc}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-14 sm:px-6">
+        <div className="rounded-3xl border border-[#2D5A27]/10 bg-white p-6 shadow-sm sm:p-8">
+          <h2 className="text-xl font-bold text-[#2D5A27] sm:text-2xl">
+            {lang === "tr" ? "Sık Sorulanlar" : "Frequently Asked Questions"}
+          </h2>
+          <div className="mt-5 space-y-3">
+            {faqs.map((item) => (
+              <div key={item.q} className="rounded-2xl border border-neutral-100 bg-[#faf8f5] p-4">
+                <p className="text-sm font-semibold text-[#2D5A27]">{item.q}</p>
+                <p className="mt-1 text-sm text-neutral-600">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="border-t border-[#2D5A27]/10 bg-white/60 py-14">
         <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
           <p className="text-sm font-semibold uppercase tracking-wide text-[#F28C28]">Hemen dene</p>
@@ -91,6 +206,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <footer className="border-t border-[#2D5A27]/10 py-5 text-center">
+        <p className="text-xs font-medium tracking-wide text-neutral-500">prod by YUSUF KUTAS</p>
+      </footer>
     </div>
   );
 }

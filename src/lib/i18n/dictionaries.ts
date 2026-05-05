@@ -6,7 +6,7 @@ export interface Dict {
   kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string; pickFromKitchen: string; pickFromKitchenHint: string; categoryAll: string; categorySpice: string; categoryMeat: string; categoryVegFruit: string; categoryGrain: string; categoryDairy: string; selected: string; clearAll: string; addToKitchen: string; modalTitle: string; modalHint: string; saveAll: string; cancel: string; saving: string; nothingFound: string; addedToKitchen: string };
   chef: { title: string; badge: string; subtitle: string; placeholder: string; send: string; thinking: string; cookBtn: string; cooking: string; recipeReady: string; pantryTitle: string; pantryStock: string; pantryEmpty: string; pantryLink: string; cookSuccess: string; ingredientPickTitle: string; ingredientPickHint: string; generateRecipe: string; coreIngredientLocked: string; selectionReady: string };
   recipes: { title: string; subtitle: string; openInChef: string; usePantry: string; steps: string; minutes: string; ingredients: string };
-  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; calculate: string; female: string; male: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string };
+  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string };
   premium: { modalTitle: string; monthlyPrice: string; yearlyPrice: string; phoneLabel: string; phonePlaceholder: string; submitBtn: string; submitting: string; success: string; description: string; close: string };
   admin: { title: string; premiumRequests: string; name: string; phone: string; date: string; status: string; activatePremium: string; noRequests: string };
   home: { badge: string; hero: string; heroDesc: string; ctaCook: string; ctaKitchen: string; sectionTitle: string; card1Title: string; card1Desc: string; card2Title: string; card2Desc: string; card3Title: string; card3Desc: string; ctaSection: string; ctaSignup: string; ctaCatalog: string };
@@ -114,14 +114,25 @@ const tr: Dict = {
     gender: "Cinsiyet",
     age: "Yaş",
     goal: "Hedef",
+    activity: "Aktivite Seviyesi",
     calculate: "Hesapla",
     female: "Kadın",
     male: "Erkek",
+    sedentary: "Sedanter (Masa başı)",
+    light: "Hafif aktif (Haftada 1-2 gün)",
+    moderate: "Orta aktif (Haftada 3-4 gün)",
+    active: "Aktif (Haftada 5-6 gün)",
+    veryActive: "Çok aktif (Her gün yoğun)",
     weightLoss: "Kilo verme",
     muscle: "Kas kazanma",
     maintain: "Kilo koruma",
     preview: "Form önizlemesi",
     unlocked: "Premium aktif — diyet planınız hazırlanıyor.",
+    premiumOnly: "Bu özellik sadece Premium üyeler içindir.",
+    fillFields: "Lütfen Boy, Kilo, Yaş, Cinsiyet ve Aktivite Seviyesi alanlarını doğru doldurun.",
+    calcLoading: "Hesaplanıyor…",
+    calcError: "Bir hata oluştu, lütfen değerleri kontrol edip tekrar deneyin.",
+    resultTitle: "Kişiye Özel Diyet Sonucu",
   },
   premium: {
     modalTitle: "Premium'a Geç",
@@ -288,14 +299,25 @@ const en: Dict = {
     gender: "Gender",
     age: "Age",
     goal: "Goal",
+    activity: "Activity Level",
     calculate: "Calculate",
     female: "Female",
     male: "Male",
+    sedentary: "Sedentary (Desk job)",
+    light: "Lightly active (1-2 days/week)",
+    moderate: "Moderately active (3-4 days/week)",
+    active: "Active (5-6 days/week)",
+    veryActive: "Very active (Daily intense)",
     weightLoss: "Weight loss",
     muscle: "Muscle gain",
     maintain: "Maintain weight",
     preview: "Form preview",
     unlocked: "Premium active — your diet plan is being prepared.",
+    premiumOnly: "This feature is available to Premium members only.",
+    fillFields: "Please fill Height, Weight, Age, Gender, and Activity Level correctly.",
+    calcLoading: "Calculating…",
+    calcError: "An error occurred. Please check your values and try again.",
+    resultTitle: "Personalized Diet Result",
   },
   premium: {
     modalTitle: "Go Premium",
