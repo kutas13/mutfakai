@@ -6,7 +6,7 @@ export interface Dict {
   kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string; pickFromKitchen: string; pickFromKitchenHint: string; categoryAll: string; categorySpice: string; categoryMeat: string; categoryVegFruit: string; categoryGrain: string; categoryDairy: string; selected: string; clearAll: string; addToKitchen: string; modalTitle: string; modalHint: string; saveAll: string; cancel: string; saving: string; nothingFound: string; addedToKitchen: string };
   chef: { title: string; badge: string; subtitle: string; placeholder: string; send: string; thinking: string; cookBtn: string; cooking: string; recipeReady: string; pantryTitle: string; pantryStock: string; pantryEmpty: string; pantryLink: string; cookSuccess: string; ingredientPickTitle: string; ingredientPickHint: string; generateRecipe: string; coreIngredientLocked: string; selectionReady: string };
   recipes: { title: string; subtitle: string; openInChef: string; usePantry: string; steps: string; minutes: string; ingredients: string };
-  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string };
+  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string; modeModalTitle: string; modeModalDesc: string; modePantryTitle: string; modePantryDesc: string; modeDietitianTitle: string; modeDietitianDesc: string; modeCancel: string; pantryBadge: string; dietitianBadge: string; regenerate: string };
   premium: { modalTitle: string; monthlyPrice: string; yearlyPrice: string; phoneLabel: string; phonePlaceholder: string; submitBtn: string; submitting: string; success: string; description: string; close: string };
   admin: { title: string; premiumRequests: string; name: string; phone: string; date: string; status: string; activatePremium: string; noRequests: string };
   home: { badge: string; hero: string; heroDesc: string; ctaCook: string; ctaKitchen: string; sectionTitle: string; card1Title: string; card1Desc: string; card2Title: string; card2Desc: string; card3Title: string; card3Desc: string; ctaSection: string; ctaSignup: string; ctaCatalog: string };
@@ -133,6 +133,16 @@ const tr: Dict = {
     calcLoading: "Hesaplanıyor…",
     calcError: "Bir hata oluştu, lütfen değerleri kontrol edip tekrar deneyin.",
     resultTitle: "Kişiye Özel Diyet Sonucu",
+    modeModalTitle: "Diyet planını nasıl oluşturalım?",
+    modeModalDesc: "Sana iki farklı şekilde plan hazırlayabilirim. Tercih ettiğin yöntemi seç.",
+    modePantryTitle: "Dolabıma & geçmişime göre",
+    modePantryDesc: "Şu an dolabında olan ve geçmişte sık eklediğin ürünleri merkezde tutarak kişisel bir günlük plan kurar.",
+    modeDietitianTitle: "Diyetisyen tavsiyesine göre",
+    modeDietitianDesc: "Dolaptan bağımsız, profesyonel bir diyetisyenin önereceği dengeli, çeşitli ve kaliteli bir günlük plan oluşturur.",
+    modeCancel: "Vazgeç",
+    pantryBadge: "Dolaba göre",
+    dietitianBadge: "Diyetisyen önerisi",
+    regenerate: "Yeni plan oluştur",
   },
   premium: {
     modalTitle: "Premium'a Geç",
@@ -318,6 +328,16 @@ const en: Dict = {
     calcLoading: "Calculating…",
     calcError: "An error occurred. Please check your values and try again.",
     resultTitle: "Personalized Diet Result",
+    modeModalTitle: "How should we build your diet plan?",
+    modeModalDesc: "I can build the plan in two different ways. Pick the one you prefer.",
+    modePantryTitle: "Based on my pantry & history",
+    modePantryDesc: "Builds a personal daily plan around the items currently in your pantry and the ones you frequently add.",
+    modeDietitianTitle: "Based on dietitian guidance",
+    modeDietitianDesc: "Creates a balanced, varied, professional-grade daily plan, independent of your pantry.",
+    modeCancel: "Cancel",
+    pantryBadge: "Pantry based",
+    dietitianBadge: "Dietitian suggestion",
+    regenerate: "Generate a new plan",
   },
   premium: {
     modalTitle: "Go Premium",
