@@ -1,7 +1,7 @@
 export type Lang = "tr" | "en";
 
 export interface Dict {
-  nav: { cook: string; kitchen: string; recipes: string; diet: string; login: string; logout: string; admin: string };
+  nav: { cook: string; kitchen: string; recipes: string; diet: string; random: string; login: string; logout: string; admin: string };
   auth: { title: string; subtitle: string; login: string; register: string; firstName: string; lastName: string; email: string; password: string; passwordHint: string; loginBtn: string; registerBtn: string; loading: string; backHome: string; accountCreated: string; registrationFailed: string };
   kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string; pickFromKitchen: string; pickFromKitchenHint: string; categoryAll: string; categorySpice: string; categoryMeat: string; categoryVegFruit: string; categoryGrain: string; categoryDairy: string; selected: string; clearAll: string; addToKitchen: string; modalTitle: string; modalHint: string; saveAll: string; cancel: string; saving: string; nothingFound: string; addedToKitchen: string };
   chef: { title: string; badge: string; subtitle: string; placeholder: string; send: string; thinking: string; cookBtn: string; cooking: string; recipeReady: string; pantryTitle: string; pantryStock: string; pantryEmpty: string; pantryLink: string; cookSuccess: string; ingredientPickTitle: string; ingredientPickHint: string; generateRecipe: string; coreIngredientLocked: string; selectionReady: string };
@@ -10,14 +10,16 @@ export interface Dict {
   premium: { modalTitle: string; monthlyPrice: string; yearlyPrice: string; phoneLabel: string; phonePlaceholder: string; submitBtn: string; submitting: string; success: string; description: string; close: string };
   admin: { title: string; premiumRequests: string; name: string; phone: string; date: string; status: string; activatePremium: string; noRequests: string };
   home: { badge: string; hero: string; heroDesc: string; ctaCook: string; ctaKitchen: string; sectionTitle: string; card1Title: string; card1Desc: string; card2Title: string; card2Desc: string; card3Title: string; card3Desc: string; ctaSection: string; ctaSignup: string; ctaCatalog: string };
+  random: { title: string; subtitle: string; pickHint: string; pantryEmpty: string; pantryEmptyAction: string; selectAll: string; clearAll: string; askButton: string; thinking: string; ideasReady: string; cookButton: string; modalTitle: string; modalQuestion: string; servingsLabel: string; modalSubmit: string; modalCancel: string; recipeStreaming: string; recipeReady: string; backToIdeas: string; selectAtLeastOne: string };
 }
 
 const tr: Dict = {
   nav: {
     cook: "Şimdi Pişir",
-    kitchen: "Mutfak",
+    kitchen: "Dolabım",
     recipes: "Hazır Yemekler",
     diet: "Diyet",
+    random: "Ne Pişirsem?",
     login: "Giriş Yap",
     logout: "Çıkış",
     admin: "Admin Panel",
@@ -40,7 +42,7 @@ const tr: Dict = {
     registrationFailed: "Kayıt tamamlanamadı. Bilgileri kontrol edip tekrar dene.",
   },
   kitchen: {
-    title: "Mutfağım",
+    title: "Dolabım",
     subtitle: "Malzemelerini kaydet; pişirme sırasında buradan düşülür.",
     ingredient: "Malzeme",
     quantity: "Miktar",
@@ -53,7 +55,7 @@ const tr: Dict = {
     emptyState: "Henüz malzeme yok — yukarıdan ekleyerek başla.",
     searchPlaceholder: "Tarif veya malzeme ara…",
     invalidInput: "Geçerli bir malzeme adı ve miktar girin.",
-    pickFromKitchen: "Mutfağımdakileri Seç",
+    pickFromKitchen: "Dolabımdakileri Seç",
     pickFromKitchenHint: "İhtiyacın olan malzemelere dokun, alttan miktarlarını gir.",
     categoryAll: "Tümü",
     categorySpice: "Baharat ve Soslar",
@@ -63,14 +65,14 @@ const tr: Dict = {
     categoryDairy: "Süt Ürünleri",
     selected: "Seçilenler",
     clearAll: "Tümünü Temizle",
-    addToKitchen: "Mutfağa Ekle",
+    addToKitchen: "Dolaba Ekle",
     modalTitle: "Miktarları Gir",
     modalHint: "Her malzeme için miktarı ve birimi gir; kaydedince stoğuna eklenir.",
     saveAll: "Hepsini Kaydet",
     cancel: "İptal",
     saving: "Kaydediliyor…",
     nothingFound: "Eşleşen malzeme bulunamadı.",
-    addedToKitchen: "Mutfağına eklendi!",
+    addedToKitchen: "Dolabına eklendi!",
   },
   chef: {
     title: "Başşef ile sohbet",
@@ -85,7 +87,7 @@ const tr: Dict = {
     pantryTitle: "Dolap özeti",
     pantryStock: "Güncel stok",
     pantryEmpty: "Dolabın boş görünüyor.",
-    pantryLink: "Mutfağa malzeme ekle",
+    pantryLink: "Dolabına malzeme ekle",
     cookSuccess: "Afiyet olsun! Stokların güncellendi.",
     ingredientPickTitle: "İstemediğiniz malzemeleri listeden çıkartın",
     ingredientPickHint: "Ana malzemeler sabittir, yan malzemeleri kapatabilirsiniz.",
@@ -160,14 +162,38 @@ const tr: Dict = {
     ctaSignup: "Ücretsiz kayıt ol",
     ctaCatalog: "Kataloğu gör",
   },
+  random: {
+    title: "Rastgele Tarif",
+    subtitle: "Sadece seçtiğin malzemelerle yapılabilecek sürpriz lezzetleri keşfet!",
+    pickHint: "Dolabındaki malzemelerden kullanmak istediklerine dokun.",
+    pantryEmpty: "Dolabın boş görünüyor.",
+    pantryEmptyAction: "Önce dolabına malzeme ekle",
+    selectAll: "Tümünü Seç",
+    clearAll: "Temizle",
+    askButton: "Bunlarla Ne Yapabilirim?",
+    thinking: "Şef düşünüyor…",
+    ideasReady: "Şef'in önerileri",
+    cookButton: "Yap",
+    modalTitle: "Harika seçim!",
+    modalQuestion: "tarifini kaç kişi için hazırlayalım?",
+
+    servingsLabel: "Kişi sayısı",
+    modalSubmit: "Tarifi Ver",
+    modalCancel: "Vazgeç",
+    recipeStreaming: "Şef tarifi yazıyor…",
+    recipeReady: "Tarif hazır",
+    backToIdeas: "Önerilere dön",
+    selectAtLeastOne: "En az bir malzeme seç.",
+  },
 };
 
 const en: Dict = {
   nav: {
     cook: "Cook Now",
-    kitchen: "Kitchen",
+    kitchen: "My Pantry",
     recipes: "Recipes",
     diet: "Diet",
+    random: "What Should I Cook?",
     login: "Log In",
     logout: "Log Out",
     admin: "Admin Panel",
@@ -190,7 +216,7 @@ const en: Dict = {
     registrationFailed: "Registration failed. Please check your info and try again.",
   },
   kitchen: {
-    title: "My Kitchen",
+    title: "My Pantry",
     subtitle: "Record your ingredients; amounts are deducted when you cook.",
     ingredient: "Ingredient",
     quantity: "Quantity",
@@ -203,7 +229,7 @@ const en: Dict = {
     emptyState: "No ingredients yet — start by adding above.",
     searchPlaceholder: "Search recipe or ingredient…",
     invalidInput: "Enter a valid ingredient name and quantity.",
-    pickFromKitchen: "Pick from My Kitchen",
+    pickFromKitchen: "Pick from My Pantry",
     pickFromKitchenHint: "Tap the ingredients you need; enter their amounts at the bottom.",
     categoryAll: "All",
     categorySpice: "Spices & Sauces",
@@ -213,14 +239,14 @@ const en: Dict = {
     categoryDairy: "Dairy",
     selected: "Selected",
     clearAll: "Clear All",
-    addToKitchen: "Add to Kitchen",
+    addToKitchen: "Add to Pantry",
     modalTitle: "Enter Quantities",
     modalHint: "Set quantity and unit for each item; they'll be saved to your stock.",
     saveAll: "Save All",
     cancel: "Cancel",
     saving: "Saving…",
     nothingFound: "No matching ingredients.",
-    addedToKitchen: "Added to your kitchen!",
+    addedToKitchen: "Added to your pantry!",
   },
   chef: {
     title: "Chat with Head Chef",
@@ -309,6 +335,28 @@ const en: Dict = {
     ctaSection: "Digitize your kitchen, cook now.",
     ctaSignup: "Free sign up",
     ctaCatalog: "Browse catalog",
+  },
+  random: {
+    title: "Surprise Recipe",
+    subtitle: "Discover delicious dishes you can make using only the ingredients you pick!",
+    pickHint: "Tap the pantry items you'd like to use.",
+    pantryEmpty: "Your pantry looks empty.",
+    pantryEmptyAction: "Add ingredients to your pantry first",
+    selectAll: "Select All",
+    clearAll: "Clear",
+    askButton: "What Can I Make?",
+    thinking: "Chef is thinking…",
+    ideasReady: "Chef's suggestions",
+    cookButton: "Cook",
+    modalTitle: "Great pick!",
+    modalQuestion: "— for how many people?",
+    servingsLabel: "Servings",
+    modalSubmit: "Get the Recipe",
+    modalCancel: "Cancel",
+    recipeStreaming: "Chef is writing the recipe…",
+    recipeReady: "Recipe ready",
+    backToIdeas: "Back to ideas",
+    selectAtLeastOne: "Pick at least one ingredient.",
   },
 };
 

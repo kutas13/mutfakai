@@ -44,6 +44,7 @@ export function SiteHeader({
 
         <nav className="flex flex-wrap items-center justify-end gap-1 sm:gap-2">
           <Link href="/pisir" className={primaryBtn}>{t.nav.cook}</Link>
+          <Link href="/rastgele" className={linkClass}>{t.nav.random}</Link>
           <Link href="/mutfak" className={linkClass}>{t.nav.kitchen}</Link>
           <Link href="/hazir-yemekler" className={linkClass}>{t.nav.recipes}</Link>
           <Link href="/diyet" className={linkClass}>{t.nav.diet}</Link>
