@@ -10,8 +10,8 @@ function mapAuthError(message: string, isEn: boolean): string {
   const m = message.toLowerCase();
   if (m.includes("email rate limit exceeded") || m.includes("rate limit")) {
     return isEn
-      ? "Too many signup attempts in a short time. Please wait 60 seconds and try again, or log in if account already exists."
-      : "Kısa sürede çok fazla kayıt denendi. 60 saniye bekleyip tekrar dene veya hesap oluştuysa giriş yap.";
+      ? "Sign up is temporarily unavailable. Please try again."
+      : "Kayıt işlemi şu anda geçici olarak kullanılamıyor. Lütfen tekrar deneyin.";
   }
   if (m.includes("email not confirmed")) {
     return isEn
@@ -52,40 +52,39 @@ function AuthFormInner() {
 
     try {
       if (mode === "register") {
-        const { data, error: err } = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: { first_name: firstName.trim(), last_name: lastName.trim() },
-          },
-        });
-        if (err) {
-          setError(mapAuthError(err.message, lang === "en"));
-          return;
-        }
-        if (data.session) {
-          router.push(next);
-          router.refresh();
-          return;
-        }
-        if (data.user) {
-          const { error: signInErr } = await supabase.auth.signInWithPassword({
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             email: email.trim(),
             password,
-          });
-          if (!signInErr) {
-            router.push(next);
-            router.refresh();
-            return;
-          }
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+          }),
+        });
 
-          // If Supabase email confirmation is enabled in dashboard, instant login is blocked.
-          // We still show account created message so user sees a successful signup.
-          setSuccessInfo(t.auth.accountCreated);
-          setMode("login");
+        if (!res.ok) {
+          let msg = t.auth.registrationFailed;
+          try {
+            const j = (await res.json()) as { error?: string };
+            if (j?.error) msg = j.error;
+          } catch {
+            // ignore JSON parse errors
+          }
+          setError(mapAuthError(msg, lang === "en"));
           return;
         }
-        setError(t.auth.registrationFailed);
+
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password,
+        });
+        if (signInErr) {
+          setError(mapAuthError(signInErr.message, lang === "en"));
+          return;
+        }
+        router.push(next);
+        router.refresh();
         return;
       }
 
