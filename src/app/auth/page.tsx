@@ -6,10 +6,25 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useLang } from "@/lib/i18n/context";
 
+function mapAuthError(message: string, isEn: boolean): string {
+  const m = message.toLowerCase();
+  if (m.includes("email rate limit exceeded") || m.includes("rate limit")) {
+    return isEn
+      ? "Too many signup attempts in a short time. Please wait 60 seconds and try again, or log in if account already exists."
+      : "Kısa sürede çok fazla kayıt denendi. 60 saniye bekleyip tekrar dene veya hesap oluştuysa giriş yap.";
+  }
+  if (m.includes("email not confirmed")) {
+    return isEn
+      ? "Email confirmation is enabled in Supabase. Disable it from Auth > Providers > Email to allow instant signup."
+      : "Supabase'te e-posta doğrulaması açık. Anında kayıt için Auth > Providers > Email bölümünden kapat.";
+  }
+  return message;
+}
+
 function AuthFormInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const nextRaw = params.get("next") || "/mutfak";
   const next = nextRaw.startsWith("/") && !nextRaw.startsWith("//") ? nextRaw : "/mutfak";
 
@@ -45,7 +60,7 @@ function AuthFormInner() {
           },
         });
         if (err) {
-          setError(err.message);
+          setError(mapAuthError(err.message, lang === "en"));
           return;
         }
         if (data.session) {
@@ -79,7 +94,7 @@ function AuthFormInner() {
         password,
       });
       if (err) {
-        setError(err.message);
+        setError(mapAuthError(err.message, lang === "en"));
         return;
       }
       router.push(next);

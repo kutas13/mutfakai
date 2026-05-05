@@ -9,6 +9,18 @@ import { isAdmin } from "@/lib/auth/admin";
 type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very_active";
 type Goal = "kilo_verme" | "kas" | "koruma";
 
+function cleanDietOutput(text: string): string {
+  return text
+    .replace(/\\\[/g, "")
+    .replace(/\\\]/g, "")
+    .replace(/\\times/g, "x")
+    .replace(/\\approx/g, "~")
+    .replace(/\\text\{([^}]*)\}/g, "$1")
+    .replace(/\*\*/g, "")
+    .replace(/^#\s*/gm, "")
+    .trim();
+}
+
 export default function DiyetPage() {
   const { t, lang } = useLang();
   const [isPremium, setIsPremium] = useState(false);
@@ -115,9 +127,11 @@ export default function DiyetPage() {
         const { value, done } = await reader.read();
         if (done) break;
         acc += decoder.decode(value, { stream: true });
-        setResult(acc);
+        setResult(cleanDietOutput(acc));
       }
-      console.log("[diet] streamed chars", acc.length);
+      const normalized = cleanDietOutput(acc);
+      setResult(normalized);
+      console.log("[diet] streamed chars", normalized.length);
     } catch (err) {
       console.log("[diet] api error", err);
       setError(t.diet.calcError);

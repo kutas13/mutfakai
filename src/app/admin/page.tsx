@@ -18,6 +18,15 @@ type PremiumReq = {
   is_premium?: boolean;
 };
 
+type RegisteredUser = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  is_premium: boolean;
+  lang: "tr" | "en";
+  created_at: string;
+};
+
 type AuditLog = {
   id: string;
   event_type: string;
@@ -31,6 +40,7 @@ export default function AdminPage() {
   const router = useRouter();
   const { t } = useLang();
   const [rows, setRows] = useState<PremiumReq[]>([]);
+  const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(false);
@@ -50,6 +60,10 @@ export default function AdminPage() {
       .order("created_at", { ascending: false });
 
     const { data: profiles } = await sb.from("profiles").select("id, first_name, last_name, is_premium");
+    const { data: allUsers } = await sb
+      .from("profiles")
+      .select("id, first_name, last_name, is_premium, lang, created_at")
+      .order("created_at", { ascending: false });
 
     const merged: PremiumReq[] = (reqs ?? []).map((r) => {
       const p = (profiles ?? []).find((p) => p.id === r.user_id);
@@ -61,6 +75,7 @@ export default function AdminPage() {
       };
     });
     setRows(merged);
+    setUsers((allUsers ?? []) as RegisteredUser[]);
 
     const { data: audit } = await sb
       .from("admin_audit_logs")
@@ -146,6 +161,54 @@ export default function AdminPage() {
                           }`}
                         />
                       </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-[#2D5A27]">Kayıtlı Kullanıcılar</h2>
+        {users.length === 0 ? (
+          <p className="mt-4 text-sm text-neutral-500">Henüz kullanıcı kaydı yok.</p>
+        ) : (
+          <div className="mt-4 overflow-x-auto rounded-2xl border border-[#2D5A27]/12 bg-white shadow-sm">
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead className="border-b border-neutral-100 bg-[#faf8f5] text-xs uppercase tracking-wide text-neutral-500">
+                <tr>
+                  <th className="px-4 py-3 font-medium">Ad Soyad</th>
+                  <th className="px-4 py-3 font-medium">Dil</th>
+                  <th className="px-4 py-3 font-medium">Premium</th>
+                  <th className="px-4 py-3 font-medium">Kayıt Tarihi</th>
+                  <th className="px-4 py-3 font-medium">Kullanıcı ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((u) => (
+                  <tr key={u.id} className="border-b border-neutral-50">
+                    <td className="px-4 py-3 font-medium text-neutral-900">
+                      {[u.first_name, u.last_name].filter(Boolean).join(" ") || "—"}
+                    </td>
+                    <td className="px-4 py-3 uppercase text-neutral-600">{u.lang}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                          u.is_premium
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-neutral-100 text-neutral-700"
+                        }`}
+                      >
+                        {u.is_premium ? "Aktif" : "Pasif"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {new Date(u.created_at).toLocaleString("tr-TR")}
+                    </td>
+                    <td className="max-w-[260px] truncate px-4 py-3 font-mono text-xs text-neutral-600">
+                      {u.id}
                     </td>
                   </tr>
                 ))}
