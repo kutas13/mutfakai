@@ -91,16 +91,11 @@ export default function FalPage() {
 
       const { data: prof } = await sb
         .from("profiles")
-        .select("first_name, last_name, is_premium")
+        .select("is_premium")
         .eq("id", user.id)
         .single();
       const premium = Boolean(prof?.is_premium) || isAdmin(user.email);
       setIsPremium(Boolean(prof?.is_premium));
-
-      if (prof && (!fullName || fullName.trim() === "")) {
-        const fn = [prof.first_name, prof.last_name].filter(Boolean).join(" ");
-        if (fn) setFullName(fn);
-      }
 
       if (premium) {
         const { data: rows } = await sb
@@ -116,7 +111,7 @@ export default function FalPage() {
 
       setAuthChecked(true);
     })();
-  }, [fullName]);
+  }, []);
 
   const allowed = isPremium || isOwner;
 
