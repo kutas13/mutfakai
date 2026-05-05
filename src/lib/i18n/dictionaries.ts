@@ -6,7 +6,7 @@ export interface Dict {
   kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string; pickFromKitchen: string; pickFromKitchenHint: string; categoryAll: string; categorySpice: string; categoryMeat: string; categoryVegFruit: string; categoryGrain: string; categoryDairy: string; selected: string; clearAll: string; addToKitchen: string; modalTitle: string; modalHint: string; saveAll: string; cancel: string; saving: string; nothingFound: string; addedToKitchen: string };
   chef: { title: string; badge: string; subtitle: string; placeholder: string; send: string; thinking: string; cookBtn: string; cooking: string; recipeReady: string; pantryTitle: string; pantryStock: string; pantryEmpty: string; pantryLink: string; cookSuccess: string; ingredientPickTitle: string; ingredientPickHint: string; generateRecipe: string; coreIngredientLocked: string; selectionReady: string };
   recipes: { title: string; subtitle: string; openInChef: string; usePantry: string; steps: string; minutes: string; ingredients: string };
-  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string; modeModalTitle: string; modeModalDesc: string; modePantryTitle: string; modePantryDesc: string; modeDietitianTitle: string; modeDietitianDesc: string; modeCancel: string; pantryBadge: string; dietitianBadge: string; regenerate: string };
+  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string; modeModalTitle: string; modeModalDesc: string; modePantryTitle: string; modePantryDesc: string; modeDietitianTitle: string; modeDietitianDesc: string; modeCancel: string; pantryBadge: string; dietitianBadge: string; regenerate: string; freqModalTitle: string; freqModalDesc: string; freqSingle: string; freqSingleDesc: string; freqMulti: string; freqMultiDesc: string; spanWeekly: string; spanMonthly: string; budgetLabel: string; budgetHint: string; budgetPlaceholder: string; freqGo: string; introTitle: string; budgetTitle: string; weekPrefix: string; dayMonday: string; dayTuesday: string; dayWednesday: string; dayThursday: string; dayFriday: string; daySaturday: string; daySunday: string };
   premium: { modalTitle: string; monthlyPrice: string; yearlyPrice: string; phoneLabel: string; phonePlaceholder: string; submitBtn: string; submitting: string; success: string; description: string; close: string };
   admin: { title: string; premiumRequests: string; name: string; phone: string; date: string; status: string; activatePremium: string; noRequests: string };
   home: { badge: string; hero: string; heroDesc: string; ctaCook: string; ctaKitchen: string; sectionTitle: string; card1Title: string; card1Desc: string; card2Title: string; card2Desc: string; card3Title: string; card3Desc: string; ctaSection: string; ctaSignup: string; ctaCatalog: string };
@@ -143,6 +143,28 @@ const tr: Dict = {
     pantryBadge: "Dolaba göre",
     dietitianBadge: "Diyetisyen önerisi",
     regenerate: "Yeni plan oluştur",
+    freqModalTitle: "Plan ne sıklıkta olsun?",
+    freqModalDesc: "Tek bir günlük liste mi, yoksa her gün için ayrı liste mi istiyorsun? Aylık bütçeni de yazarsan plana katılır.",
+    freqSingle: "1 liste, her gün uygulanır",
+    freqSingleDesc: "Her gün takip edebileceğin tek bir günlük plan oluşturur.",
+    freqMulti: "Her güne ayrı liste",
+    freqMultiDesc: "Her gün için farklı yemek planı kurar; haftalık ya da aylık seçebilirsin.",
+    spanWeekly: "Haftalık (7 gün)",
+    spanMonthly: "Aylık (4 hafta)",
+    budgetLabel: "Aylık bütçe (₺) — opsiyonel",
+    budgetHint: "Bütçen plan içinde dikkate alınır; boş bırakırsan bütçe sınırı yok demektir.",
+    budgetPlaceholder: "Örn: 6000",
+    freqGo: "Planı oluştur",
+    introTitle: "Özet",
+    budgetTitle: "Bütçe notu",
+    weekPrefix: "Hafta",
+    dayMonday: "Pazartesi",
+    dayTuesday: "Salı",
+    dayWednesday: "Çarşamba",
+    dayThursday: "Perşembe",
+    dayFriday: "Cuma",
+    daySaturday: "Cumartesi",
+    daySunday: "Pazar",
   },
   premium: {
     modalTitle: "Premium'a Geç",
@@ -338,6 +360,28 @@ const en: Dict = {
     pantryBadge: "Pantry based",
     dietitianBadge: "Dietitian suggestion",
     regenerate: "Generate a new plan",
+    freqModalTitle: "How often should the plan repeat?",
+    freqModalDesc: "Do you want a single daily list or a different list per day? If you share a monthly budget, I will factor it in.",
+    freqSingle: "Single list — repeat each day",
+    freqSingleDesc: "Builds a single daily plan you can follow every day.",
+    freqMulti: "Different list per day",
+    freqMultiDesc: "A different meal plan for each day; pick weekly or monthly span.",
+    spanWeekly: "Weekly (7 days)",
+    spanMonthly: "Monthly (4 weeks)",
+    budgetLabel: "Monthly budget (₺) — optional",
+    budgetHint: "Budget is considered in the plan; leave empty for no budget cap.",
+    budgetPlaceholder: "e.g. 6000",
+    freqGo: "Generate plan",
+    introTitle: "Summary",
+    budgetTitle: "Budget note",
+    weekPrefix: "Week",
+    dayMonday: "Monday",
+    dayTuesday: "Tuesday",
+    dayWednesday: "Wednesday",
+    dayThursday: "Thursday",
+    dayFriday: "Friday",
+    daySaturday: "Saturday",
+    daySunday: "Sunday",
   },
   premium: {
     modalTitle: "Go Premium",

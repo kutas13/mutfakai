@@ -9,18 +9,16 @@ import { isAdmin } from "@/lib/auth/admin";
 type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very_active";
 type Goal = "kilo_verme" | "kas" | "koruma";
 type DietMode = "pantry" | "dietitian";
+type FrequencyMode = "single" | "weekly" | "monthly";
 
-function cleanDietOutput(text: string): string {
-  return text
-    .replace(/\\\[/g, "")
-    .replace(/\\\]/g, "")
-    .replace(/\\times/g, "x")
-    .replace(/\\approx/g, "~")
-    .replace(/\\text\{([^}]*)\}/g, "$1")
-    .replace(/\*\*/g, "")
-    .replace(/^#\s*/gm, "")
-    .trim();
-}
+type SinglePlan = { type: "single"; planText: string };
+type MultiPlan = {
+  type: "multi";
+  intro: string;
+  budgetSummary: string;
+  weeks: { label: string; days: { dayName: string; content: string }[] }[];
+};
+type PlanResponse = SinglePlan | MultiPlan;
 
 export default function DiyetPage() {
   const { t, lang } = useLang();
@@ -28,6 +26,7 @@ export default function DiyetPage() {
   const [isOwner, setIsOwner] = useState(false);
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false);
+  const [freqOpen, setFreqOpen] = useState(false);
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -36,10 +35,18 @@ export default function DiyetPage() {
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>("moderate");
   const [goal, setGoal] = useState<Goal>("kilo_verme");
 
-  const [result, setResult] = useState("");
+  const [pendingMode, setPendingMode] = useState<DietMode | null>(null);
+  const [freqChoice, setFreqChoice] = useState<"single" | "multi">("single");
+  const [spanChoice, setSpanChoice] = useState<"weekly" | "monthly">("weekly");
+  const [budget, setBudget] = useState("");
+
+  const [plan, setPlan] = useState<PlanResponse | null>(null);
+  const [activeWeek, setActiveWeek] = useState(0);
+  const [activeDay, setActiveDay] = useState(0);
+  const [activeFrequency, setActiveFrequency] = useState<FrequencyMode | null>(null);
+  const [activeMode, setActiveMode] = useState<DietMode | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [activeMode, setActiveMode] = useState<DietMode | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -91,19 +98,29 @@ export default function DiyetPage() {
     setModeOpen(true);
   }
 
-  async function runMode(mode: DietMode, regenerate = false) {
+  function pickMode(mode: DietMode) {
+    setPendingMode(mode);
     setModeOpen(false);
+    setFreqOpen(true);
+  }
+
+  async function runPlan(regenerate = false) {
+    if (!pendingMode) return;
+    const frequency: FrequencyMode = freqChoice === "single" ? "single" : spanChoice;
+    setFreqOpen(false);
     setError(null);
-    setResult("");
-    setActiveMode(mode);
+    setPlan(null);
+    setActiveMode(pendingMode);
+    setActiveFrequency(frequency);
+    setActiveWeek(0);
+    setActiveDay(0);
 
     const h = Number(height.replace(",", "."));
     const w = Number(weight.replace(",", "."));
     const a = Number(age.replace(",", "."));
+    const budgetNum = Number(budget.replace(/[^\d]/g, ""));
 
     setLoading(true);
-    console.log("[diet] submit payload", { mode, regenerate });
-
     try {
       const res = await fetch("/api/diet-plan", {
         method: "POST",
@@ -116,37 +133,36 @@ export default function DiyetPage() {
           activityLevel,
           goal,
           lang,
-          mode,
+          mode: pendingMode,
+          frequency,
+          budgetMonthlyTl: Number.isFinite(budgetNum) && budgetNum > 0 ? budgetNum : 0,
           regenerate,
         }),
       });
 
-      console.log("[diet] api status", res.status);
-
-      if (!res.ok || !res.body) {
+      if (!res.ok) {
         setError(t.diet.calcError);
         setLoading(false);
         return;
       }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let acc = "";
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        acc += decoder.decode(value, { stream: true });
-        setResult(cleanDietOutput(acc));
-      }
-      const normalized = cleanDietOutput(acc);
-      setResult(normalized);
-      console.log("[diet] streamed chars", normalized.length);
+      const data = (await res.json()) as PlanResponse;
+      setPlan(data);
     } catch (err) {
       console.log("[diet] api error", err);
       setError(t.diet.calcError);
     } finally {
       setLoading(false);
     }
+  }
+
+  function regenerateActive() {
+    if (!activeMode || !activeFrequency) return;
+    setPendingMode(activeMode);
+    setFreqChoice(activeFrequency === "single" ? "single" : "multi");
+    if (activeFrequency !== "single") {
+      setSpanChoice(activeFrequency);
+    }
+    runPlan(true);
   }
 
   const inputCls =
@@ -159,39 +175,26 @@ export default function DiyetPage() {
       {modeOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
           <div className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-xl sm:p-6">
-            <h2 className="text-lg font-bold text-[#2D5A27] sm:text-xl">
-              {t.diet.modeModalTitle}
-            </h2>
+            <h2 className="text-lg font-bold text-[#2D5A27] sm:text-xl">{t.diet.modeModalTitle}</h2>
             <p className="mt-1 text-sm text-neutral-600">{t.diet.modeModalDesc}</p>
-
             <div className="mt-5 space-y-3">
               <button
                 type="button"
-                onClick={() => runMode("pantry")}
-                className="group flex w-full flex-col gap-1 rounded-2xl border border-[#2D5A27]/15 bg-[#faf8f5] p-4 text-left transition hover:border-[#2D5A27]/45 hover:bg-white"
+                onClick={() => pickMode("pantry")}
+                className="flex w-full flex-col gap-1 rounded-2xl border border-[#2D5A27]/15 bg-[#faf8f5] p-4 text-left transition hover:border-[#2D5A27]/45 hover:bg-white"
               >
-                <span className="text-sm font-bold text-[#2D5A27]">
-                  📦 {t.diet.modePantryTitle}
-                </span>
-                <span className="text-xs leading-relaxed text-neutral-600">
-                  {t.diet.modePantryDesc}
-                </span>
+                <span className="text-sm font-bold text-[#2D5A27]">📦 {t.diet.modePantryTitle}</span>
+                <span className="text-xs leading-relaxed text-neutral-600">{t.diet.modePantryDesc}</span>
               </button>
-
               <button
                 type="button"
-                onClick={() => runMode("dietitian")}
-                className="group flex w-full flex-col gap-1 rounded-2xl border border-[#F28C28]/30 bg-[#fff7ec] p-4 text-left transition hover:border-[#F28C28]/60 hover:bg-white"
+                onClick={() => pickMode("dietitian")}
+                className="flex w-full flex-col gap-1 rounded-2xl border border-[#F28C28]/30 bg-[#fff7ec] p-4 text-left transition hover:border-[#F28C28]/60 hover:bg-white"
               >
-                <span className="text-sm font-bold text-[#d07113]">
-                  🥗 {t.diet.modeDietitianTitle}
-                </span>
-                <span className="text-xs leading-relaxed text-neutral-700">
-                  {t.diet.modeDietitianDesc}
-                </span>
+                <span className="text-sm font-bold text-[#d07113]">🥗 {t.diet.modeDietitianTitle}</span>
+                <span className="text-xs leading-relaxed text-neutral-700">{t.diet.modeDietitianDesc}</span>
               </button>
             </div>
-
             <button
               type="button"
               onClick={() => setModeOpen(false)}
@@ -199,6 +202,101 @@ export default function DiyetPage() {
             >
               {t.diet.modeCancel}
             </button>
+          </div>
+        </div>
+      )}
+
+      {freqOpen && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-4 sm:items-center">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-5 shadow-xl sm:p-6">
+            <h2 className="text-lg font-bold text-[#2D5A27] sm:text-xl">{t.diet.freqModalTitle}</h2>
+            <p className="mt-1 text-sm text-neutral-600">{t.diet.freqModalDesc}</p>
+
+            <div className="mt-5 space-y-3">
+              <button
+                type="button"
+                onClick={() => setFreqChoice("single")}
+                className={`flex w-full flex-col gap-1 rounded-2xl border p-4 text-left transition ${
+                  freqChoice === "single"
+                    ? "border-[#2D5A27] bg-[#2D5A27]/5"
+                    : "border-neutral-200 bg-white hover:border-[#2D5A27]/40"
+                }`}
+              >
+                <span className="text-sm font-bold text-[#2D5A27]">📅 {t.diet.freqSingle}</span>
+                <span className="text-xs text-neutral-600">{t.diet.freqSingleDesc}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFreqChoice("multi")}
+                className={`flex w-full flex-col gap-1 rounded-2xl border p-4 text-left transition ${
+                  freqChoice === "multi"
+                    ? "border-[#F28C28] bg-[#fff7ec]"
+                    : "border-neutral-200 bg-white hover:border-[#F28C28]/40"
+                }`}
+              >
+                <span className="text-sm font-bold text-[#d07113]">🗓️ {t.diet.freqMulti}</span>
+                <span className="text-xs text-neutral-700">{t.diet.freqMultiDesc}</span>
+              </button>
+
+              {freqChoice === "multi" && (
+                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#faf8f5] p-2">
+                  <button
+                    type="button"
+                    onClick={() => setSpanChoice("weekly")}
+                    className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      spanChoice === "weekly"
+                        ? "bg-white text-[#2D5A27] shadow-sm"
+                        : "text-neutral-500 hover:text-[#2D5A27]"
+                    }`}
+                  >
+                    {t.diet.spanWeekly}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSpanChoice("monthly")}
+                    className={`rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                      spanChoice === "monthly"
+                        ? "bg-white text-[#2D5A27] shadow-sm"
+                        : "text-neutral-500 hover:text-[#2D5A27]"
+                    }`}
+                  >
+                    {t.diet.spanMonthly}
+                  </button>
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-semibold text-[#2D5A27]">
+                  {t.diet.budgetLabel}
+                </label>
+                <input
+                  value={budget}
+                  onChange={(e) => setBudget(e.target.value)}
+                  className={inputCls}
+                  placeholder={t.diet.budgetPlaceholder}
+                  inputMode="numeric"
+                />
+                <p className="mt-1 text-[11px] text-neutral-500">{t.diet.budgetHint}</p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setFreqOpen(false)}
+                className="rounded-full border border-neutral-200 px-4 py-2.5 text-sm font-semibold text-neutral-700 transition hover:bg-neutral-50"
+              >
+                {t.diet.modeCancel}
+              </button>
+              <button
+                type="button"
+                onClick={() => runPlan(false)}
+                className="rounded-full bg-[#2D5A27] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#234822]"
+              >
+                {t.diet.freqGo}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -316,10 +414,10 @@ export default function DiyetPage() {
         )}
       </form>
 
-      {(loading || result) && (
+      {(loading || plan) && (
         <section className="mt-6 rounded-2xl border border-[#2D5A27]/12 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold text-[#2D5A27]">{t.diet.resultTitle}</h2>
               {activeMode && (
                 <span
@@ -332,20 +430,109 @@ export default function DiyetPage() {
                   {activeMode === "pantry" ? t.diet.pantryBadge : t.diet.dietitianBadge}
                 </span>
               )}
+              {activeFrequency && (
+                <span className="rounded-full bg-neutral-100 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-neutral-700">
+                  {activeFrequency === "single"
+                    ? t.diet.freqSingle
+                    : activeFrequency === "weekly"
+                    ? t.diet.spanWeekly
+                    : t.diet.spanMonthly}
+                </span>
+              )}
             </div>
-            {activeMode && !loading && (isPremium || isOwner) && (
+            {plan && !loading && (isPremium || isOwner) && (
               <button
                 type="button"
-                onClick={() => runMode(activeMode, true)}
+                onClick={regenerateActive}
                 className="rounded-full border border-[#2D5A27]/30 px-3 py-1.5 text-xs font-semibold text-[#2D5A27] transition hover:bg-[#2D5A27]/5"
               >
                 {t.diet.regenerate}
               </button>
             )}
           </div>
-          <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">
-            {loading && !result ? t.diet.calcLoading : result}
-          </div>
+
+          {loading && !plan && (
+            <p className="mt-3 text-sm text-neutral-500">{t.diet.calcLoading}</p>
+          )}
+
+          {plan?.type === "single" && (
+            <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">
+              {plan.planText}
+            </div>
+          )}
+
+          {plan?.type === "multi" && (
+            <div className="mt-3 space-y-4">
+              {plan.intro && (
+                <div className="rounded-2xl bg-[#faf8f5] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#2D5A27]">
+                    {t.diet.introTitle}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">
+                    {plan.intro}
+                  </p>
+                </div>
+              )}
+              {plan.budgetSummary && (
+                <div className="rounded-2xl bg-[#fff7ec] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#d07113]">
+                    {t.diet.budgetTitle}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">
+                    {plan.budgetSummary}
+                  </p>
+                </div>
+              )}
+
+              {plan.weeks.length > 1 && (
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                  {plan.weeks.map((w, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setActiveWeek(i);
+                        setActiveDay(0);
+                      }}
+                      className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                        activeWeek === i
+                          ? "border-[#2D5A27] bg-[#2D5A27] text-white"
+                          : "border-neutral-200 bg-white text-[#2D5A27] hover:border-[#2D5A27]/50"
+                      }`}
+                    >
+                      {w.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                {(plan.weeks[activeWeek]?.days ?? []).map((d, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveDay(i)}
+                    className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                      activeDay === i
+                        ? "border-[#F28C28] bg-[#F28C28] text-white"
+                        : "border-neutral-200 bg-white text-neutral-700 hover:border-[#F28C28]/50"
+                    }`}
+                  >
+                    {d.dayName}
+                  </button>
+                ))}
+              </div>
+
+              <div className="rounded-2xl border border-[#2D5A27]/10 bg-[#faf8f5] p-4">
+                <p className="text-xs font-bold uppercase tracking-wider text-[#2D5A27]">
+                  {plan.weeks[activeWeek]?.label} · {plan.weeks[activeWeek]?.days[activeDay]?.dayName}
+                </p>
+                <pre className="mt-2 whitespace-pre-wrap font-sans text-sm leading-relaxed text-neutral-800">
+                  {plan.weeks[activeWeek]?.days[activeDay]?.content}
+                </pre>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </div>
