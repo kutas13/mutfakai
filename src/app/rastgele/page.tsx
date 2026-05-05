@@ -1,17 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useMemo, useRef, useState } from "react";
 import { useLang } from "@/lib/i18n/context";
-import { formatDisplay, type BaseUnit } from "@/lib/inventory/units";
+import {
+  INGREDIENT_CATALOG,
+  type IngredientCatalogItem,
+  type IngredientCategory,
+} from "@/lib/inventory/ingredient-catalog";
 
-type StockRow = {
-  id: string;
-  item_name: string;
-  quantity: number;
-  unit: BaseUnit;
-};
+type CategoryTab = IngredientCategory | "all";
 
 type RecipeIdea = {
   name: string;
@@ -20,9 +17,10 @@ type RecipeIdea = {
 
 export default function RastgelePage() {
   const { t, lang } = useLang();
-  const [stocks, setStocks] = useState<StockRow[]>([]);
-  const [loadingPantry, setLoadingPantry] = useState(true);
-  const [selected, setSelected] = useState<string[]>([]);
+
+  const [search, setSearch] = useState("");
+  const [activeCategory, setActiveCategory] = useState<CategoryTab>("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [ideas, setIdeas] = useState<RecipeIdea[]>([]);
   const [ideasLoading, setIdeasLoading] = useState(false);
@@ -35,51 +33,53 @@ export default function RastgelePage() {
   const [recipeLoading, setRecipeLoading] = useState(false);
   const [activeDishName, setActiveDishName] = useState<string | null>(null);
 
-  const recipeRef = useRef<HTMLDivElement | null>(null);
   const ideasRef = useRef<HTMLDivElement | null>(null);
+  const recipeRef = useRef<HTMLDivElement | null>(null);
 
-  const loadPantry = useCallback(async () => {
-    const sb = createClient();
-    const { data, error: err } = await sb
-      .from("stocks")
-      .select("id, item_name, quantity, unit")
-      .order("created_at", { ascending: false });
-    if (!err) {
-      setStocks(
-        (data ?? []).map((r) => ({
-          id: r.id,
-          item_name: r.item_name,
-          quantity: Number(r.quantity),
-          unit: r.unit as BaseUnit,
-        })),
-      );
-    }
-    setLoadingPantry(false);
-  }, []);
+  const categoryTabs: { id: CategoryTab; label: string }[] = useMemo(
+    () => [
+      { id: "all", label: t.kitchen.categoryAll },
+      { id: "spice", label: t.kitchen.categorySpice },
+      { id: "meat", label: t.kitchen.categoryMeat },
+      { id: "vegFruit", label: t.kitchen.categoryVegFruit },
+      { id: "grain", label: t.kitchen.categoryGrain },
+      { id: "dairy", label: t.kitchen.categoryDairy },
+    ],
+    [t],
+  );
 
-  useEffect(() => {
-    void loadPantry();
-  }, [loadPantry]);
+  const visibleItems = useMemo(() => {
+    const q = search.trim().toLocaleLowerCase("tr-TR");
+    return INGREDIENT_CATALOG.filter((item) => {
+      if (activeCategory !== "all" && item.category !== activeCategory) return false;
+      if (!q) return true;
+      const tr = item.nameTr.toLocaleLowerCase("tr-TR");
+      const en = item.nameEn.toLocaleLowerCase("en-US");
+      return tr.includes(q) || en.includes(q);
+    });
+  }, [search, activeCategory]);
 
-  function toggle(itemName: string) {
-    setSelected((prev) =>
-      prev.includes(itemName)
-        ? prev.filter((x) => x !== itemName)
-        : [...prev, itemName],
+  const selectedItems = useMemo<IngredientCatalogItem[]>(() => {
+    const map = new Map(INGREDIENT_CATALOG.map((it) => [it.id, it] as const));
+    return selectedIds
+      .map((id) => map.get(id))
+      .filter((it): it is IngredientCatalogItem => Boolean(it));
+  }, [selectedIds]);
+
+  function toggleSelect(itemId: string) {
+    setError(null);
+    setSelectedIds((prev) =>
+      prev.includes(itemId) ? prev.filter((x) => x !== itemId) : [...prev, itemId],
     );
   }
 
-  function selectAll() {
-    setSelected(stocks.map((s) => s.item_name));
-  }
-
   function clearAll() {
-    setSelected([]);
+    setSelectedIds([]);
   }
 
   async function fetchIdeas() {
     setError(null);
-    if (selected.length === 0) {
+    if (selectedItems.length === 0) {
       setError(t.random.selectAtLeastOne);
       return;
     }
@@ -87,11 +87,16 @@ export default function RastgelePage() {
     setIdeas([]);
     setRecipe("");
     setActiveDishName(null);
+
+    const ingredientNames = selectedItems.map((it) =>
+      lang === "en" ? it.nameEn : it.nameTr,
+    );
+
     try {
       const res = await fetch("/api/random-ideas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ingredients: selected, lang }),
+        body: JSON.stringify({ ingredients: ingredientNames, lang }),
       });
       if (!res.ok) {
         const txt = await res.text();
@@ -126,6 +131,10 @@ export default function RastgelePage() {
       recipeRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
 
+    const ingredientNames = selectedItems.map((it) =>
+      lang === "en" ? it.nameEn : it.nameTr,
+    );
+
     try {
       const res = await fetch("/api/random-recipe", {
         method: "POST",
@@ -133,7 +142,7 @@ export default function RastgelePage() {
         body: JSON.stringify({
           dishName: dish.name,
           servings,
-          ingredients: selected,
+          ingredients: ingredientNames,
           lang,
         }),
       });
@@ -159,12 +168,15 @@ export default function RastgelePage() {
     }
   }
 
-  const sortedStocks = useMemo(() => stocks, [stocks]);
+  const trayHeight = selectedItems.length > 0 ? 220 : 0;
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-3 pb-16 pt-4 sm:px-6 sm:pt-8">
+    <div
+      className="mx-auto w-full max-w-5xl px-3 pb-16 pt-4 sm:px-5 sm:pt-6"
+      style={{ paddingBottom: `${64 + trayHeight}px` }}
+    >
       {/* HEADER */}
-      <header className="mb-5 text-center sm:mb-7 sm:text-left">
+      <header className="mb-3 text-center sm:mb-5 sm:text-left">
         <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#F28C28]">
           MutfakAI
         </p>
@@ -176,101 +188,100 @@ export default function RastgelePage() {
         </p>
       </header>
 
-      {/* PANTRY CHIPS */}
-      <section className="rounded-3xl border border-[#2D5A27]/12 bg-white p-4 shadow-sm sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-[#2D5A27] sm:text-base">
-            {t.random.pickHint}
-          </h2>
-          {sortedStocks.length > 0 && (
-            <div className="flex gap-1.5">
-              <button
-                type="button"
-                onClick={selectAll}
-                className="min-h-9 rounded-full border border-[#2D5A27]/25 bg-white px-3 text-[11px] font-semibold text-[#2D5A27] transition hover:bg-[#2D5A27]/5 sm:text-xs"
-              >
-                {t.random.selectAll}
-              </button>
-              {selected.length > 0 && (
-                <button
-                  type="button"
-                  onClick={clearAll}
-                  className="min-h-9 rounded-full px-3 text-[11px] font-semibold text-red-600 transition hover:bg-red-50 sm:text-xs"
-                >
-                  {t.random.clearAll}
-                </button>
-              )}
-            </div>
-          )}
+      {/* STICKY SEARCH + TABS */}
+      <div className="sticky top-0 z-20 -mx-3 bg-gradient-to-b from-[#faf8f5] via-[#faf8f5] to-[#faf8f5]/80 px-3 pb-2 pt-2 backdrop-blur sm:-mx-5 sm:px-5">
+        <div className="relative">
+          <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t.kitchen.searchPlaceholder}
+            className="min-h-12 w-full rounded-2xl border border-neutral-200 bg-white pl-11 pr-4 text-sm shadow-sm outline-none placeholder:text-neutral-400 focus:border-[#2D5A27]/40 focus:ring-2 focus:ring-[#2D5A27]/15"
+          />
         </div>
 
         <div className="mt-3">
-          {loadingPantry ? (
-            <p className="py-6 text-center text-sm text-neutral-500">…</p>
-          ) : sortedStocks.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-200 bg-[#faf8f5] px-4 py-6 text-center">
-              <p className="text-sm text-neutral-600">{t.random.pantryEmpty}</p>
-              <Link
-                href="/mutfak"
-                className="mt-3 inline-flex min-h-10 items-center rounded-full bg-[#2D5A27] px-4 text-xs font-semibold text-white shadow transition hover:bg-[#234822]"
-              >
-                {t.random.pantryEmptyAction}
-              </Link>
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {sortedStocks.map((row) => {
-                const isSelected = selected.includes(row.item_name);
-                return (
-                  <button
-                    key={row.id}
-                    type="button"
-                    aria-pressed={isSelected}
-                    onClick={() => toggle(row.item_name)}
-                    className={`group inline-flex min-h-10 items-center gap-2 rounded-full border px-3 text-xs font-semibold transition active:scale-95 sm:text-sm ${
-                      isSelected
-                        ? "border-transparent bg-[#2D5A27] text-white shadow"
-                        : "border-neutral-200 bg-white text-neutral-700 hover:border-[#2D5A27]/40 hover:text-[#2D5A27]"
-                    }`}
-                  >
-                    <span>{row.item_name}</span>
-                    <span
-                      className={`tabular-nums text-[10px] ${
-                        isSelected
-                          ? "text-white/80"
-                          : "text-neutral-400 group-hover:text-[#2D5A27]/70"
-                      }`}
-                    >
-                      {formatDisplay(row.quantity, row.unit)}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <h2 className="text-sm font-bold text-[#2D5A27] sm:text-base">
+            {t.random.pickHint}
+          </h2>
         </div>
 
-        {sortedStocks.length > 0 && (
-          <button
-            type="button"
-            onClick={() => void fetchIdeas()}
-            disabled={ideasLoading || selected.length === 0}
-            className="mt-4 min-h-12 w-full rounded-full bg-[#F28C28] py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#e07d1f] disabled:opacity-50"
-          >
-            {ideasLoading ? t.random.thinking : t.random.askButton}
-          </button>
-        )}
+        <div className="-mx-3 mt-3 overflow-x-auto px-3 sm:-mx-5 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-2">
+            {categoryTabs.map((tab) => {
+              const isActive = activeCategory === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveCategory(tab.id)}
+                  className={`min-h-10 shrink-0 whitespace-nowrap rounded-full border px-4 text-xs font-semibold transition sm:text-sm ${
+                    isActive
+                      ? "border-[#2D5A27] bg-[#2D5A27] text-white shadow"
+                      : "border-neutral-200 bg-white text-neutral-600 hover:border-[#2D5A27]/40 hover:text-[#2D5A27]"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
-        {error && (
-          <p className="mt-3 rounded-xl bg-red-50 px-4 py-2.5 text-xs text-red-700">
-            {error}
+      {error && (
+        <p className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+
+      {/* GRID */}
+      <section className="mt-4">
+        {visibleItems.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-neutral-200 bg-white px-6 py-10 text-center text-sm text-neutral-500">
+            {t.kitchen.nothingFound}
           </p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 sm:gap-3 md:grid-cols-5 lg:grid-cols-6">
+            {visibleItems.map((item) => {
+              const isSelected = selectedIds.includes(item.id);
+              const name = lang === "en" ? item.nameEn : item.nameTr;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => toggleSelect(item.id)}
+                  aria-pressed={isSelected}
+                  className={`group relative flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border bg-white p-2 text-center shadow-sm transition active:scale-95 sm:gap-1.5 sm:p-3 ${
+                    isSelected
+                      ? "border-transparent ring-2 ring-[#2D5A27]"
+                      : "border-neutral-100 hover:border-[#2D5A27]/40 hover:shadow"
+                  }`}
+                >
+                  <span
+                    className="select-none text-3xl leading-none sm:text-4xl"
+                    aria-hidden
+                  >
+                    {item.emoji}
+                  </span>
+                  <span className="line-clamp-2 text-[11px] font-medium text-neutral-800 sm:text-xs">
+                    {name}
+                  </span>
+                  {isSelected && (
+                    <span className="absolute right-1.5 top-1.5 grid h-5 w-5 place-items-center rounded-full bg-[#2D5A27] text-[10px] font-bold text-white shadow">
+                      ✓
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         )}
       </section>
 
       {/* IDEAS */}
       {(ideasLoading || ideas.length > 0) && (
-        <section ref={ideasRef} className="mt-6">
+        <section ref={ideasRef} className="mt-8">
           <h2 className="mb-3 text-base font-bold text-[#2D5A27] sm:text-lg">
             {t.random.ideasReady}
           </h2>
@@ -348,15 +359,65 @@ export default function RastgelePage() {
           </div>
 
           <article className="rounded-3xl border border-[#2D5A27]/15 bg-white p-4 shadow-sm sm:p-6">
-            <div className="prose-recipe whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 sm:text-[15px]">
+            <div className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800 sm:text-[15px]">
               {recipe || (
-                <span className="text-neutral-400">
-                  {t.random.recipeStreaming}
-                </span>
+                <span className="text-neutral-400">{t.random.recipeStreaming}</span>
               )}
             </div>
           </article>
         </section>
+      )}
+
+      {/* BOTTOM TRAY */}
+      {selectedItems.length > 0 && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-neutral-100 bg-white pb-[max(env(safe-area-inset-bottom),0px)] shadow-[0_-8px_24px_rgba(0,0,0,0.08)]">
+          <div className="mx-auto w-full max-w-5xl px-3 py-3 sm:px-5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-[#2D5A27]">
+                {t.kitchen.selected} ({selectedItems.length})
+              </span>
+              <button
+                type="button"
+                onClick={clearAll}
+                className="min-h-10 rounded-full px-3 text-xs font-semibold text-red-600 hover:bg-red-50"
+              >
+                {t.kitchen.clearAll}
+              </button>
+            </div>
+
+            <div className="-mx-3 mt-2 flex gap-2 overflow-x-auto px-3 pb-1 sm:-mx-5 sm:px-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {selectedItems.map((item) => {
+                const name = lang === "en" ? item.nameEn : item.nameTr;
+                return (
+                  <span
+                    key={item.id}
+                    className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-[#2D5A27]/10 py-1.5 pl-3 pr-1.5 text-xs font-semibold text-[#2D5A27]"
+                  >
+                    <span aria-hidden>{item.emoji}</span>
+                    <span>{name}</span>
+                    <button
+                      type="button"
+                      onClick={() => toggleSelect(item.id)}
+                      aria-label="Remove"
+                      className="grid h-5 w-5 place-items-center rounded-full bg-[#2D5A27]/15 text-[10px] hover:bg-[#2D5A27]/25"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void fetchIdeas()}
+              disabled={ideasLoading}
+              className="mt-3 min-h-12 w-full rounded-full bg-[#F28C28] py-3 text-sm font-bold text-white shadow-lg transition hover:bg-[#e07d1f] disabled:opacity-60"
+            >
+              {ideasLoading ? t.random.thinking : t.random.askButton}
+            </button>
+          </div>
+        </div>
       )}
 
       {/* SERVINGS MODAL */}
@@ -398,17 +459,8 @@ function ServingsModal({
             {t.random.modalTitle}
           </p>
           <p className="mt-2 text-base text-neutral-800 sm:text-lg">
-            {lang === "tr" ? (
-              <>
-                <span className="font-bold text-[#2D5A27]">{dishName}</span>{" "}
-                {t.random.modalQuestion}
-              </>
-            ) : (
-              <>
-                <span className="font-bold text-[#2D5A27]">{dishName}</span>{" "}
-                {t.random.modalQuestion}
-              </>
-            )}
+            <span className="font-bold text-[#2D5A27]">{dishName}</span>{" "}
+            {t.random.modalQuestion}
           </p>
         </div>
 
@@ -432,7 +484,8 @@ function ServingsModal({
               value={servings}
               onChange={(e) => {
                 const n = Number(e.target.value);
-                if (!Number.isNaN(n)) setServings(Math.max(1, Math.min(20, Math.floor(n))));
+                if (!Number.isNaN(n))
+                  setServings(Math.max(1, Math.min(20, Math.floor(n))));
               }}
               className="h-12 w-20 rounded-2xl border border-neutral-200 text-center text-2xl font-bold tabular-nums text-[#2D5A27] outline-none focus:ring-2 focus:ring-[#2D5A27]/25"
             />
@@ -468,5 +521,23 @@ function ServingsModal({
         </div>
       </div>
     </div>
+  );
+}
+
+function SearchIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
   );
 }
