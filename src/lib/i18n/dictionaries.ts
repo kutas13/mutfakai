@@ -1,16 +1,17 @@
 export type Lang = "tr" | "en";
 
 export interface Dict {
-  nav: { cook: string; kitchen: string; recipes: string; diet: string; random: string; login: string; logout: string; admin: string };
+  nav: { cook: string; kitchen: string; recipes: string; diet: string; random: string; fortune: string; login: string; logout: string; admin: string };
   auth: { title: string; subtitle: string; login: string; register: string; firstName: string; lastName: string; email: string; password: string; passwordHint: string; loginBtn: string; registerBtn: string; loading: string; backHome: string; accountCreated: string; registrationFailed: string };
   kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string; pickFromKitchen: string; pickFromKitchenHint: string; categoryAll: string; categorySpice: string; categoryMeat: string; categoryVegFruit: string; categoryGrain: string; categoryDairy: string; selected: string; clearAll: string; addToKitchen: string; modalTitle: string; modalHint: string; saveAll: string; cancel: string; saving: string; nothingFound: string; addedToKitchen: string };
   chef: { title: string; badge: string; subtitle: string; placeholder: string; send: string; thinking: string; cookBtn: string; cooking: string; recipeReady: string; pantryTitle: string; pantryStock: string; pantryEmpty: string; pantryLink: string; cookSuccess: string; ingredientPickTitle: string; ingredientPickHint: string; generateRecipe: string; coreIngredientLocked: string; selectionReady: string };
   recipes: { title: string; subtitle: string; openInChef: string; usePantry: string; steps: string; minutes: string; ingredients: string };
-  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string; modeModalTitle: string; modeModalDesc: string; modePantryTitle: string; modePantryDesc: string; modeDietitianTitle: string; modeDietitianDesc: string; modeCancel: string; pantryBadge: string; dietitianBadge: string; regenerate: string; freqModalTitle: string; freqModalDesc: string; freqSingle: string; freqSingleDesc: string; freqMulti: string; freqMultiDesc: string; spanWeekly: string; spanMonthly: string; budgetLabel: string; budgetHint: string; budgetPlaceholder: string; freqGo: string; introTitle: string; budgetTitle: string; weekPrefix: string; dayMonday: string; dayTuesday: string; dayWednesday: string; dayThursday: string; dayFriday: string; daySaturday: string; daySunday: string };
+  diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; targetWeight: string; gender: string; age: string; goal: string; activity: string; calculate: string; female: string; male: string; sedentary: string; light: string; moderate: string; active: string; veryActive: string; weightLoss: string; muscle: string; maintain: string; deficit: string; preview: string; unlocked: string; premiumOnly: string; fillFields: string; calcLoading: string; calcError: string; resultTitle: string; modeModalTitle: string; modeModalDesc: string; modePantryTitle: string; modePantryDesc: string; modeDietitianTitle: string; modeDietitianDesc: string; modeCancel: string; pantryBadge: string; dietitianBadge: string; regenerate: string; freqModalTitle: string; freqModalDesc: string; freqSingle: string; freqSingleDesc: string; freqMulti: string; freqMultiDesc: string; spanWeekly: string; spanMonthly: string; budgetLabel: string; budgetHint: string; budgetPlaceholder: string; targetKcalLabel: string; targetKcalHint: string; targetKcalPlaceholder: string; freqGo: string; introTitle: string; budgetTitle: string; exerciseTitle: string; weekPrefix: string; dayMonday: string; dayTuesday: string; dayWednesday: string; dayThursday: string; dayFriday: string; daySaturday: string; daySunday: string; styleLabel: string; styleStandard: string; styleKeto: string; styleOmad: string };
   premium: { modalTitle: string; monthlyPrice: string; yearlyPrice: string; phoneLabel: string; phonePlaceholder: string; submitBtn: string; submitting: string; success: string; description: string; close: string };
   admin: { title: string; premiumRequests: string; name: string; phone: string; date: string; status: string; activatePremium: string; noRequests: string };
   home: { badge: string; hero: string; heroDesc: string; ctaCook: string; ctaKitchen: string; sectionTitle: string; card1Title: string; card1Desc: string; card2Title: string; card2Desc: string; card3Title: string; card3Desc: string; ctaSection: string; ctaSignup: string; ctaCatalog: string };
   random: { title: string; subtitle: string; pickHint: string; pantryEmpty: string; pantryEmptyAction: string; selectAll: string; clearAll: string; askButton: string; thinking: string; ideasReady: string; cookButton: string; modalTitle: string; modalQuestion: string; servingsLabel: string; modalSubmit: string; modalCancel: string; recipeStreaming: string; recipeReady: string; backToIdeas: string; selectAtLeastOne: string };
+  fortune: { title: string; subtitle: string; fullName: string; fullNamePlaceholder: string; dob: string; relationship: string; relYes: string; relNo: string; partnerName: string; partnerPlaceholder: string; uploadTitle: string; uploadHint: string; uploadButton: string; remove: string; askButton: string; scanning: string; scanningHint: string; resultTitle: string; resultMeta: string; needPhoto: string; needName: string; premiumOnly: string; premiumCta: string; historyTitle: string; historyEmpty: string; openReading: string; back: string };
 }
 
 const tr: Dict = {
@@ -20,6 +21,7 @@ const tr: Dict = {
     recipes: "Hazır Yemekler",
     diet: "Diyet",
     random: "Ne Pişirsem?",
+    fortune: "Kahve Falı",
     login: "Giriş Yap",
     logout: "Çıkış",
     admin: "Admin Panel",
@@ -111,6 +113,7 @@ const tr: Dict = {
     premiumBtn: "Premium Üye Ol",
     height: "Boy (cm)",
     weight: "Kilo (kg)",
+    targetWeight: "Hedef Kilo (kg)",
     gender: "Cinsiyet",
     age: "Yaş",
     goal: "Hedef",
@@ -126,6 +129,7 @@ const tr: Dict = {
     weightLoss: "Kilo verme",
     muscle: "Kas kazanma",
     maintain: "Kilo koruma",
+    deficit: "Kalori açığı (zayıflama)",
     preview: "Form önizlemesi",
     unlocked: "Premium aktif — diyet planınız hazırlanıyor.",
     premiumOnly: "Bu özellik sadece Premium üyeler içindir.",
@@ -154,9 +158,13 @@ const tr: Dict = {
     budgetLabel: "Aylık bütçe (₺) — opsiyonel",
     budgetHint: "Bütçen plan içinde dikkate alınır; boş bırakırsan bütçe sınırı yok demektir.",
     budgetPlaceholder: "Örn: 6000",
+    targetKcalLabel: "Günlük max kalori (kcal) — opsiyonel",
+    targetKcalHint: "Hedefin 'Kalori açığı' ise burası tavandır. AI plana bu sınırı aşmadan kurar.",
+    targetKcalPlaceholder: "Örn: 1600",
     freqGo: "Planı oluştur",
     introTitle: "Özet",
     budgetTitle: "Bütçe notu",
+    exerciseTitle: "Egzersiz / Kardiyo",
     weekPrefix: "Hafta",
     dayMonday: "Pazartesi",
     dayTuesday: "Salı",
@@ -165,11 +173,15 @@ const tr: Dict = {
     dayFriday: "Cuma",
     daySaturday: "Cumartesi",
     daySunday: "Pazar",
+    styleLabel: "Diyet Stili",
+    styleStandard: "Standart",
+    styleKeto: "Keto",
+    styleOmad: "OMAD",
   },
   premium: {
     modalTitle: "Premium'a Geç",
-    monthlyPrice: "Aylık 99 ₺",
-    yearlyPrice: "Yıllık 948 ₺ (Aylık 79 ₺)",
+    monthlyPrice: "Aylık 149 ₺",
+    yearlyPrice: "Yıllık 1188 ₺ (Aylık 99 ₺)",
     phoneLabel: "Telefon Numaranız",
     phonePlaceholder: "05XX XXX XX XX",
     submitBtn: "Talep Gönder",
@@ -228,6 +240,35 @@ const tr: Dict = {
     backToIdeas: "Önerilere dön",
     selectAtLeastOne: "En az bir malzeme seç.",
   },
+  fortune: {
+    title: "Falcı Bacı",
+    subtitle: "Kahve fincanlarının fotoğrafını yükle, sembolleri okuyup sana özel bir fal yorumu hazırlayalım.",
+    fullName: "Ad Soyad",
+    fullNamePlaceholder: "Örn: Yusuf Kutaş",
+    dob: "Doğum Tarihi",
+    relationship: "İlişki Durumu",
+    relYes: "Var",
+    relNo: "Yok",
+    partnerName: "Partnerin İsmi",
+    partnerPlaceholder: "Örn: Selin",
+    uploadTitle: "Fincan fotoğrafları",
+    uploadHint: "En fazla 10 fotoğraf yükleyebilirsin (.jpg/.png).",
+    uploadButton: "Fotoğraf Seç",
+    remove: "Kaldır",
+    askButton: "Kahve Falı Baktır",
+    scanning: "Fincan taranıyor…",
+    scanningHint: "Sembolleri çözüyorum, sabret bakalım…",
+    resultTitle: "Falın Hazır",
+    resultMeta: "Kişiye özel yorum",
+    needPhoto: "En az 1 kahve fincanı fotoğrafı yükle.",
+    needName: "Ad Soyad ve Doğum Tarihi gerekli.",
+    premiumOnly: "Bu özellik Premium üyelere özeldir.",
+    premiumCta: "Premium'a geç",
+    historyTitle: "Önceki Falların",
+    historyEmpty: "Henüz bakılmış fal yok.",
+    openReading: "Falı aç",
+    back: "Geri",
+  },
 };
 
 const en: Dict = {
@@ -237,6 +278,7 @@ const en: Dict = {
     recipes: "Recipes",
     diet: "Diet",
     random: "What Should I Cook?",
+    fortune: "Coffee Fortune",
     login: "Log In",
     logout: "Log Out",
     admin: "Admin Panel",
@@ -328,6 +370,7 @@ const en: Dict = {
     premiumBtn: "Go Premium",
     height: "Height (cm)",
     weight: "Weight (kg)",
+    targetWeight: "Target Weight (kg)",
     gender: "Gender",
     age: "Age",
     goal: "Goal",
@@ -343,6 +386,7 @@ const en: Dict = {
     weightLoss: "Weight loss",
     muscle: "Muscle gain",
     maintain: "Maintain weight",
+    deficit: "Calorie deficit (lean down)",
     preview: "Form preview",
     unlocked: "Premium active — your diet plan is being prepared.",
     premiumOnly: "This feature is available to Premium members only.",
@@ -371,9 +415,13 @@ const en: Dict = {
     budgetLabel: "Monthly budget (₺) — optional",
     budgetHint: "Budget is considered in the plan; leave empty for no budget cap.",
     budgetPlaceholder: "e.g. 6000",
+    targetKcalLabel: "Daily max calories (kcal) — optional",
+    targetKcalHint: "If your goal is 'Calorie deficit', this is the cap. AI will not exceed it.",
+    targetKcalPlaceholder: "e.g. 1600",
     freqGo: "Generate plan",
     introTitle: "Summary",
     budgetTitle: "Budget note",
+    exerciseTitle: "Exercise / Cardio",
     weekPrefix: "Week",
     dayMonday: "Monday",
     dayTuesday: "Tuesday",
@@ -382,11 +430,15 @@ const en: Dict = {
     dayFriday: "Friday",
     daySaturday: "Saturday",
     daySunday: "Sunday",
+    styleLabel: "Diet Style",
+    styleStandard: "Standard",
+    styleKeto: "Keto",
+    styleOmad: "OMAD",
   },
   premium: {
     modalTitle: "Go Premium",
-    monthlyPrice: "Monthly 99 ₺",
-    yearlyPrice: "Yearly 948 ₺ (79 ₺/mo)",
+    monthlyPrice: "Monthly 149 ₺",
+    yearlyPrice: "Yearly 1188 ₺ (99 ₺/mo)",
     phoneLabel: "Your Phone Number",
     phonePlaceholder: "05XX XXX XX XX",
     submitBtn: "Submit Request",
@@ -443,6 +495,35 @@ const en: Dict = {
     recipeReady: "Recipe ready",
     backToIdeas: "Back to ideas",
     selectAtLeastOne: "Pick at least one ingredient.",
+  },
+  fortune: {
+    title: "Coffee Fortune",
+    subtitle: "Upload your cup photos and I will read the symbols for a personalized fortune.",
+    fullName: "Full name",
+    fullNamePlaceholder: "e.g. Jane Doe",
+    dob: "Date of birth",
+    relationship: "Relationship status",
+    relYes: "In a relationship",
+    relNo: "Single",
+    partnerName: "Partner's name",
+    partnerPlaceholder: "e.g. Alex",
+    uploadTitle: "Cup photos",
+    uploadHint: "Upload up to 10 photos (.jpg/.png).",
+    uploadButton: "Choose photos",
+    remove: "Remove",
+    askButton: "Read my fortune",
+    scanning: "Scanning the cup…",
+    scanningHint: "Decoding the symbols, hold tight…",
+    resultTitle: "Your Fortune",
+    resultMeta: "Personalized reading",
+    needPhoto: "Upload at least 1 cup photo.",
+    needName: "Full name and date of birth are required.",
+    premiumOnly: "This feature is for Premium members only.",
+    premiumCta: "Go Premium",
+    historyTitle: "Past readings",
+    historyEmpty: "No readings yet.",
+    openReading: "Open reading",
+    back: "Back",
   },
 };
 

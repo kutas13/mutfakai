@@ -1,0 +1,13 @@
+feat(fal): add Falci Baci (coffee fortune) with vision AI + Supabase backup
+
+- new /fal page: mystic purple UI, form (name/DOB/relationship/partner),
+  up to 10 cup photo upload (auto-downscaled to 1280px), scanning animation,
+  streamed result, per-user history grouped by name
+- new /api/fortune route: gpt-4o-mini vision, premium-only, streams text and
+  saves each reading to fortune_readings + audit log
+- new fortune_readings table + RLS (insert/select own, admin all, admin delete)
+- admin panel: Kahve Fali Yedekleri grouped by user name
+- nav: purple Kahve Fali entry (TR/EN)
+- middleware: protect /fal
+- premium pricing: 149 TL monthly, 1188 TL yearly (99/mo)
+- fix(diet): styleBlock declared before userBlock to fix TS error

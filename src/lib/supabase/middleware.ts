@@ -39,6 +39,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/mutfak") ||
     path.startsWith("/pisir") ||
     path.startsWith("/rastgele") ||
+    path.startsWith("/fal") ||
     path.startsWith("/admin");
 
   if (isProtected && !user) {

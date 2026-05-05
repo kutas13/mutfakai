@@ -149,3 +149,45 @@ drop policy if exists "Audit: admin select all" on public.admin_audit_logs;
 create policy "Audit: admin select all"
   on public.admin_audit_logs for select
   using (auth.jwt() ->> 'email' = 'gmyusuf13@gmail.com');
+
+------------------------------------------------------------
+-- 5) fortune_readings — Kahve falı yedekleri (kullanıcı ismine göre)
+------------------------------------------------------------
+create table if not exists public.fortune_readings (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users (id) on delete cascade default auth.uid(),
+  full_name text not null,
+  dob date,
+  relationship text not null default 'no' check (relationship in ('yes','no')),
+  partner_name text,
+  photo_count int not null default 0,
+  fortune_text text not null,
+  lang text not null default 'tr' check (lang in ('tr','en')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists fortune_readings_user_id_idx on public.fortune_readings (user_id);
+create index if not exists fortune_readings_full_name_idx on public.fortune_readings (full_name);
+create index if not exists fortune_readings_created_at_idx on public.fortune_readings (created_at desc);
+
+alter table public.fortune_readings enable row level security;
+
+drop policy if exists "Fortune: insert own" on public.fortune_readings;
+create policy "Fortune: insert own"
+  on public.fortune_readings for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Fortune: select own" on public.fortune_readings;
+create policy "Fortune: select own"
+  on public.fortune_readings for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Fortune: admin select all" on public.fortune_readings;
+create policy "Fortune: admin select all"
+  on public.fortune_readings for select
+  using (auth.jwt() ->> 'email' = 'gmyusuf13@gmail.com');
+
+drop policy if exists "Fortune: admin delete all" on public.fortune_readings;
+create policy "Fortune: admin delete all"
+  on public.fortune_readings for delete
+  using (auth.jwt() ->> 'email' = 'gmyusuf13@gmail.com');

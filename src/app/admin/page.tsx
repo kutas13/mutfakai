@@ -29,11 +29,25 @@ type RegisteredUser = {
 
 type AuditLog = {
   id: string;
+  user_id: string;
   event_type: string;
   payload: Record<string, unknown>;
   created_at: string;
   first_name?: string;
   last_name?: string;
+};
+
+type FortuneRow = {
+  id: string;
+  user_id: string;
+  full_name: string;
+  dob: string | null;
+  relationship: "yes" | "no";
+  partner_name: string | null;
+  photo_count: number;
+  fortune_text: string;
+  lang: string;
+  created_at: string;
 };
 
 export default function AdminPage() {
@@ -42,6 +56,7 @@ export default function AdminPage() {
   const [rows, setRows] = useState<PremiumReq[]>([]);
   const [users, setUsers] = useState<RegisteredUser[]>([]);
   const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [fortunes, setFortunes] = useState<FortuneRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [authed, setAuthed] = useState(false);
 
@@ -81,11 +96,12 @@ export default function AdminPage() {
       .from("admin_audit_logs")
       .select("id, user_id, event_type, payload, created_at")
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(300);
     const joinedLogs: AuditLog[] = (audit ?? []).map((log) => {
       const p = (profiles ?? []).find((pr) => pr.id === log.user_id);
       return {
         id: log.id,
+        user_id: log.user_id,
         event_type: log.event_type,
         payload: (log.payload ?? {}) as Record<string, unknown>,
         created_at: log.created_at,
@@ -94,6 +110,16 @@ export default function AdminPage() {
       };
     });
     setLogs(joinedLogs);
+
+    const { data: fortuneRows } = await sb
+      .from("fortune_readings")
+      .select(
+        "id, user_id, full_name, dob, relationship, partner_name, photo_count, fortune_text, lang, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(500);
+    setFortunes((fortuneRows ?? []) as FortuneRow[]);
+
     setLoading(false);
   }, [router]);
 
@@ -216,6 +242,135 @@ export default function AdminPage() {
             </table>
           </div>
         )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-[#2D5A27]">Kahve Falı Yedekleri</h2>
+        {(() => {
+          if (fortunes.length === 0) {
+            return (
+              <p className="mt-4 text-sm text-neutral-500">
+                Henüz bakılan fal yok.
+              </p>
+            );
+          }
+          const grouped = new Map<string, FortuneRow[]>();
+          for (const f of fortunes) {
+            const name = (f.full_name ?? "").trim() || "—";
+            const arr = grouped.get(name) ?? [];
+            arr.push(f);
+            grouped.set(name, arr);
+          }
+          const groups = [...grouped.entries()].sort((a, b) =>
+            a[0].localeCompare(b[0], "tr"),
+          );
+          return (
+            <div className="mt-4 space-y-4">
+              {groups.map(([name, items]) => (
+                <details
+                  key={name}
+                  className="overflow-hidden rounded-2xl border border-[#2D5A27]/12 bg-white shadow-sm"
+                >
+                  <summary className="flex cursor-pointer items-center justify-between gap-2 px-4 py-3 text-sm font-semibold text-[#2D5A27]">
+                    <span>{name}</span>
+                    <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-700">
+                      {items.length} fal
+                    </span>
+                  </summary>
+                  <div className="space-y-3 border-t border-neutral-100 bg-[#faf8f5] p-4">
+                    {items.map((f) => (
+                      <article
+                        key={f.id}
+                        className="rounded-xl border border-purple-200 bg-white p-3"
+                      >
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-600">
+                          <span className="font-semibold text-[#2D5A27]">
+                            {new Date(f.created_at).toLocaleString("tr-TR")}
+                          </span>
+                          <span>D.T: {f.dob ?? "—"}</span>
+                          <span>
+                            İlişki:{" "}
+                            {f.relationship === "yes"
+                              ? `Var${f.partner_name ? ` (${f.partner_name})` : ""}`
+                              : "Yok"}
+                          </span>
+                          <span>{f.photo_count} foto</span>
+                          <span className="uppercase">{f.lang}</span>
+                        </div>
+                        <pre className="mt-2 whitespace-pre-wrap font-sans text-xs leading-relaxed text-neutral-800">
+                          {f.fortune_text}
+                        </pre>
+                      </article>
+                    ))}
+                  </div>
+                </details>
+              ))}
+            </div>
+          );
+        })()}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-[#2D5A27]">Giriş / Çıkış Geçmişi</h2>
+        {(() => {
+          const authLogs = logs.filter(
+            (l) => l.event_type === "user_login" || l.event_type === "user_logout",
+          );
+          if (authLogs.length === 0) {
+            return (
+              <p className="mt-4 text-sm text-neutral-500">
+                Henüz giriş/çıkış kaydı yok.
+              </p>
+            );
+          }
+          return (
+            <div className="mt-4 overflow-x-auto rounded-2xl border border-[#2D5A27]/12 bg-white shadow-sm">
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="border-b border-neutral-100 bg-[#faf8f5] text-xs uppercase tracking-wide text-neutral-500">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Kullanıcı</th>
+                    <th className="px-4 py-3 font-medium">E-posta</th>
+                    <th className="px-4 py-3 font-medium">Olay</th>
+                    <th className="px-4 py-3 font-medium">Tarih</th>
+                    <th className="px-4 py-3 font-medium">Cihaz</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {authLogs.map((log) => {
+                    const isLogin = log.event_type === "user_login";
+                    const email = (log.payload?.email as string | undefined) ?? "—";
+                    const ua = (log.payload?.userAgent as string | undefined) ?? "";
+                    return (
+                      <tr key={log.id} className="border-b border-neutral-50 align-top">
+                        <td className="px-4 py-3 font-medium text-neutral-900">
+                          {[log.first_name, log.last_name].filter(Boolean).join(" ") || "—"}
+                        </td>
+                        <td className="px-4 py-3 text-neutral-700">{email}</td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                              isLogin
+                                ? "bg-emerald-100 text-emerald-800"
+                                : "bg-amber-100 text-amber-800"
+                            }`}
+                          >
+                            {isLogin ? "Giriş" : "Çıkış"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-neutral-600">
+                          {new Date(log.created_at).toLocaleString("tr-TR")}
+                        </td>
+                        <td className="max-w-[260px] truncate px-4 py-3 text-xs text-neutral-500">
+                          {ua}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
       </section>
 
       <section className="mt-10">

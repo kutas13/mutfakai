@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { isAdmin } from "@/lib/auth/admin";
+import { logAuthEvent } from "@/lib/auth/auth-log";
 import { useLang } from "@/lib/i18n/context";
 
 const linkClass =
@@ -28,6 +29,7 @@ export function SiteHeader({
 
   async function signOut() {
     const supabase = createClient();
+    await logAuthEvent("user_logout");
     await supabase.auth.signOut();
     router.refresh();
     router.push("/");
@@ -48,6 +50,12 @@ export function SiteHeader({
           <Link href="/mutfak" className={linkClass}>{t.nav.kitchen}</Link>
           <Link href="/hazir-yemekler" className={linkClass}>{t.nav.recipes}</Link>
           <Link href="/diyet" className={linkClass}>{t.nav.diet}</Link>
+          <Link
+            href="/fal"
+            className="rounded-full border border-purple-300 bg-purple-100 px-3 py-2 text-sm font-semibold text-purple-700 shadow-sm transition hover:border-purple-400 hover:bg-purple-200 sm:px-4"
+          >
+            ✨ {t.nav.fortune}
+          </Link>
 
           {admin && (
             <Link href="/admin" className="rounded-full bg-red-600/90 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-700 sm:px-4">

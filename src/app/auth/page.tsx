@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { logAuthEvent } from "@/lib/auth/auth-log";
 import { useLang } from "@/lib/i18n/context";
 
 function mapAuthError(message: string, isEn: boolean): string {
@@ -83,6 +84,7 @@ function AuthFormInner() {
           setError(mapAuthError(signInErr.message, lang === "en"));
           return;
         }
+        await logAuthEvent("user_login", { method: "register" });
         router.push(next);
         router.refresh();
         return;
@@ -96,6 +98,7 @@ function AuthFormInner() {
         setError(mapAuthError(err.message, lang === "en"));
         return;
       }
+      await logAuthEvent("user_login", { method: "password" });
       router.push(next);
       router.refresh();
     } finally {

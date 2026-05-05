@@ -7,15 +7,17 @@ import { PremiumModal } from "@/components/PremiumModal";
 import { isAdmin } from "@/lib/auth/admin";
 
 type ActivityLevel = "sedentary" | "light" | "moderate" | "active" | "very_active";
-type Goal = "kilo_verme" | "kas" | "koruma";
+type Goal = "kilo_verme" | "kas" | "koruma" | "kalori_acigi";
 type DietMode = "pantry" | "dietitian";
 type FrequencyMode = "single" | "weekly" | "monthly";
+type DietStyle = "standard" | "keto" | "omad";
 
-type SinglePlan = { type: "single"; planText: string };
+type SinglePlan = { type: "single"; planText: string; exercise?: string };
 type MultiPlan = {
   type: "multi";
   intro: string;
   budgetSummary: string;
+  exercise: string;
   weeks: { label: string; days: { dayName: string; content: string }[] }[];
 };
 type PlanResponse = SinglePlan | MultiPlan;
@@ -30,15 +32,18 @@ export default function DiyetPage() {
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
+  const [targetWeight, setTargetWeight] = useState("");
   const [gender, setGender] = useState<"female" | "male">("female");
   const [age, setAge] = useState("");
   const [activityLevel, setActivityLevel] = useState<ActivityLevel>("moderate");
   const [goal, setGoal] = useState<Goal>("kilo_verme");
+  const [dietStyle, setDietStyle] = useState<DietStyle>("standard");
 
   const [pendingMode, setPendingMode] = useState<DietMode | null>(null);
   const [freqChoice, setFreqChoice] = useState<"single" | "multi">("single");
   const [spanChoice, setSpanChoice] = useState<"weekly" | "monthly">("weekly");
   const [budget, setBudget] = useState("");
+  const [targetKcal, setTargetKcal] = useState("");
 
   const [plan, setPlan] = useState<PlanResponse | null>(null);
   const [activeWeek, setActiveWeek] = useState(0);
@@ -73,14 +78,17 @@ export default function DiyetPage() {
     const h = Number(height.replace(",", "."));
     const w = Number(weight.replace(",", "."));
     const a = Number(age.replace(",", "."));
+    const tw = targetWeight.trim() ? Number(targetWeight.replace(",", ".")) : 0;
 
     const hasInvalid =
       Number.isNaN(h) ||
       Number.isNaN(w) ||
       Number.isNaN(a) ||
+      Number.isNaN(tw) ||
       h <= 0 ||
       w <= 0 ||
       a <= 0 ||
+      tw < 0 ||
       !gender ||
       !activityLevel;
 
@@ -118,7 +126,9 @@ export default function DiyetPage() {
     const h = Number(height.replace(",", "."));
     const w = Number(weight.replace(",", "."));
     const a = Number(age.replace(",", "."));
+    const tw = targetWeight.trim() ? Number(targetWeight.replace(",", ".")) : 0;
     const budgetNum = Number(budget.replace(/[^\d]/g, ""));
+    const kcalNum = Number(targetKcal.replace(/[^\d]/g, ""));
 
     setLoading(true);
     try {
@@ -129,24 +139,73 @@ export default function DiyetPage() {
           height: h,
           weight: w,
           age: a,
+          targetWeight: Number.isFinite(tw) && tw > 0 ? tw : 0,
           gender,
           activityLevel,
           goal,
           lang,
           mode: pendingMode,
           frequency,
+          dietStyle,
           budgetMonthlyTl: Number.isFinite(budgetNum) && budgetNum > 0 ? budgetNum : 0,
+          targetKcal: Number.isFinite(kcalNum) && kcalNum > 0 ? kcalNum : 0,
           regenerate,
         }),
       });
 
+      const ct = res.headers.get("content-type") ?? "";
       if (!res.ok) {
-        setError(t.diet.calcError);
-        setLoading(false);
+        if (ct.includes("application/json")) {
+          const j = (await res.json()) as { error?: string };
+          setError(j.error || t.diet.calcError);
+        } else {
+          setError(t.diet.calcError);
+        }
         return;
       }
-      const data = (await res.json()) as PlanResponse;
-      setPlan(data);
+
+      if (ct.includes("application/x-ndjson")) {
+        if (!res.body) {
+          setError(t.diet.calcError);
+          return;
+        }
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const obj = JSON.parse(trimmed) as PlanResponse | { error?: string };
+              if ("error" in obj && obj.error) {
+                setError(obj.error || t.diet.calcError);
+                continue;
+              }
+              setPlan(obj as PlanResponse);
+            } catch {
+              // ignore partial lines
+            }
+          }
+        }
+        const tail = buf.trim();
+        if (tail) {
+          try {
+            const obj = JSON.parse(tail) as PlanResponse;
+            setPlan(obj);
+          } catch {
+            // ignore
+          }
+        }
+      } else {
+        const data = (await res.json()) as PlanResponse;
+        setPlan(data);
+      }
     } catch (err) {
       console.log("[diet] api error", err);
       setError(t.diet.calcError);
@@ -279,6 +338,20 @@ export default function DiyetPage() {
                 />
                 <p className="mt-1 text-[11px] text-neutral-500">{t.diet.budgetHint}</p>
               </div>
+
+              <div>
+                <label className="text-xs font-semibold text-[#2D5A27]">
+                  {t.diet.targetKcalLabel}
+                </label>
+                <input
+                  value={targetKcal}
+                  onChange={(e) => setTargetKcal(e.target.value)}
+                  className={inputCls}
+                  placeholder={t.diet.targetKcalPlaceholder}
+                  inputMode="numeric"
+                />
+                <p className="mt-1 text-[11px] text-neutral-500">{t.diet.targetKcalHint}</p>
+              </div>
             </div>
 
             <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -341,6 +414,16 @@ export default function DiyetPage() {
             />
           </div>
           <div>
+            <label className="text-xs font-semibold text-[#2D5A27]">{t.diet.targetWeight}</label>
+            <input
+              value={targetWeight}
+              onChange={(e) => setTargetWeight(e.target.value)}
+              className={inputCls}
+              placeholder="65"
+              inputMode="decimal"
+            />
+          </div>
+          <div>
             <label className="text-xs font-semibold text-[#2D5A27]">{t.diet.gender}</label>
             <select
               value={gender}
@@ -383,6 +466,7 @@ export default function DiyetPage() {
               className={inputCls}
             >
               <option value="kilo_verme">{t.diet.weightLoss}</option>
+              <option value="kalori_acigi">{t.diet.deficit}</option>
               <option value="kas">{t.diet.muscle}</option>
               <option value="koruma">{t.diet.maintain}</option>
             </select>
@@ -394,6 +478,33 @@ export default function DiyetPage() {
             {error}
           </p>
         )}
+
+        <div>
+          <p className="text-xs font-semibold text-[#2D5A27]">{t.diet.styleLabel}</p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {(
+              [
+                { id: "standard", label: t.diet.styleStandard, icon: "🍽️" },
+                { id: "keto", label: t.diet.styleKeto, icon: "🥑" },
+                { id: "omad", label: t.diet.styleOmad, icon: "🌙" },
+              ] as { id: DietStyle; label: string; icon: string }[]
+            ).map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setDietStyle(s.id)}
+                className={`flex min-h-[52px] flex-col items-center justify-center gap-0.5 rounded-2xl border px-3 py-2 text-xs font-bold transition ${
+                  dietStyle === s.id
+                    ? "border-[#2D5A27] bg-[#2D5A27] text-white shadow-sm"
+                    : "border-neutral-200 bg-white text-[#2D5A27] hover:border-[#2D5A27]/40"
+                }`}
+              >
+                <span className="text-lg leading-none">{s.icon}</span>
+                <span>{s.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         <button
           type="submit"
@@ -456,8 +567,20 @@ export default function DiyetPage() {
           )}
 
           {plan?.type === "single" && (
-            <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">
-              {plan.planText}
+            <div className="mt-3 space-y-3">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-800">
+                {plan.planText}
+              </div>
+              {plan.exercise && plan.exercise.trim() && (
+                <div className="rounded-2xl bg-[#fff7ec] p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#d07113]">
+                    {t.diet.exerciseTitle}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">
+                    {plan.exercise}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -480,6 +603,16 @@ export default function DiyetPage() {
                   </p>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">
                     {plan.budgetSummary}
+                  </p>
+                </div>
+              )}
+              {plan.exercise && plan.exercise.trim() && (
+                <div className="rounded-2xl bg-[#2D5A27]/8 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#2D5A27]">
+                    {t.diet.exerciseTitle}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-800">
+                    {plan.exercise}
                   </p>
                 </div>
               )}
