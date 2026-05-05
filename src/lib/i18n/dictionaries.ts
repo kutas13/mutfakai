@@ -168,8 +168,8 @@ const tr: Dict = {
   },
   premium: {
     modalTitle: "Premium'a Geç",
-    monthlyPrice: "Aylık 69 ₺",
-    yearlyPrice: "Yıllık 588 ₺ (Aylık 49 ₺)",
+    monthlyPrice: "Aylık 99 ₺",
+    yearlyPrice: "Yıllık 948 ₺ (Aylık 79 ₺)",
     phoneLabel: "Telefon Numaranız",
     phonePlaceholder: "05XX XXX XX XX",
     submitBtn: "Talep Gönder",
@@ -385,8 +385,8 @@ const en: Dict = {
   },
   premium: {
     modalTitle: "Go Premium",
-    monthlyPrice: "Monthly 69 ₺",
-    yearlyPrice: "Yearly 588 ₺ (49 ₺/mo)",
+    monthlyPrice: "Monthly 99 ₺",
+    yearlyPrice: "Yearly 948 ₺ (79 ₺/mo)",
     phoneLabel: "Your Phone Number",
     phonePlaceholder: "05XX XXX XX XX",
     submitBtn: "Submit Request",
