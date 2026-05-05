@@ -3,7 +3,7 @@ export type Lang = "tr" | "en";
 export interface Dict {
   nav: { cook: string; kitchen: string; recipes: string; diet: string; login: string; logout: string; admin: string };
   auth: { title: string; subtitle: string; login: string; register: string; firstName: string; lastName: string; email: string; password: string; passwordHint: string; loginBtn: string; registerBtn: string; loading: string; backHome: string; accountCreated: string; registrationFailed: string };
-  kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string };
+  kitchen: { title: string; subtitle: string; ingredient: string; quantity: string; unit: string; add: string; save: string; delete: string; update: string; inventoryList: string; emptyState: string; searchPlaceholder: string; invalidInput: string; pickFromKitchen: string; pickFromKitchenHint: string; categoryAll: string; categorySpice: string; categoryMeat: string; categoryVegFruit: string; categoryGrain: string; categoryDairy: string; selected: string; clearAll: string; addToKitchen: string; modalTitle: string; modalHint: string; saveAll: string; cancel: string; saving: string; nothingFound: string; addedToKitchen: string };
   chef: { title: string; badge: string; subtitle: string; placeholder: string; send: string; thinking: string; cookBtn: string; cooking: string; recipeReady: string; pantryTitle: string; pantryStock: string; pantryEmpty: string; pantryLink: string; cookSuccess: string; ingredientPickTitle: string; ingredientPickHint: string; generateRecipe: string; coreIngredientLocked: string; selectionReady: string };
   recipes: { title: string; subtitle: string; openInChef: string; usePantry: string; steps: string; minutes: string; ingredients: string };
   diet: { premiumBadge: string; premiumTitle: string; premiumDesc: string; premiumBtn: string; height: string; weight: string; gender: string; age: string; goal: string; calculate: string; female: string; male: string; weightLoss: string; muscle: string; maintain: string; preview: string; unlocked: string };
@@ -51,8 +51,26 @@ const tr: Dict = {
     update: "Güncelle",
     inventoryList: "Envanter listesi",
     emptyState: "Henüz malzeme yok — yukarıdan ekleyerek başla.",
-    searchPlaceholder: "Malzeme ara…",
+    searchPlaceholder: "Tarif veya malzeme ara…",
     invalidInput: "Geçerli bir malzeme adı ve miktar girin.",
+    pickFromKitchen: "Mutfağımdakileri Seç",
+    pickFromKitchenHint: "İhtiyacın olan malzemelere dokun, alttan miktarlarını gir.",
+    categoryAll: "Tümü",
+    categorySpice: "Baharat ve Soslar",
+    categoryMeat: "Et ve Şarküteri",
+    categoryVegFruit: "Sebze ve Meyve",
+    categoryGrain: "Bakliyat",
+    categoryDairy: "Süt Ürünleri",
+    selected: "Seçilenler",
+    clearAll: "Tümünü Temizle",
+    addToKitchen: "Mutfağa Ekle",
+    modalTitle: "Miktarları Gir",
+    modalHint: "Her malzeme için miktarı ve birimi gir; kaydedince stoğuna eklenir.",
+    saveAll: "Hepsini Kaydet",
+    cancel: "İptal",
+    saving: "Kaydediliyor…",
+    nothingFound: "Eşleşen malzeme bulunamadı.",
+    addedToKitchen: "Mutfağına eklendi!",
   },
   chef: {
     title: "Başşef ile sohbet",
@@ -183,8 +201,26 @@ const en: Dict = {
     update: "Update",
     inventoryList: "Inventory",
     emptyState: "No ingredients yet — start by adding above.",
-    searchPlaceholder: "Search ingredient…",
+    searchPlaceholder: "Search recipe or ingredient…",
     invalidInput: "Enter a valid ingredient name and quantity.",
+    pickFromKitchen: "Pick from My Kitchen",
+    pickFromKitchenHint: "Tap the ingredients you need; enter their amounts at the bottom.",
+    categoryAll: "All",
+    categorySpice: "Spices & Sauces",
+    categoryMeat: "Meat & Deli",
+    categoryVegFruit: "Vegetables & Fruit",
+    categoryGrain: "Grains & Legumes",
+    categoryDairy: "Dairy",
+    selected: "Selected",
+    clearAll: "Clear All",
+    addToKitchen: "Add to Kitchen",
+    modalTitle: "Enter Quantities",
+    modalHint: "Set quantity and unit for each item; they'll be saved to your stock.",
+    saveAll: "Save All",
+    cancel: "Cancel",
+    saving: "Saving…",
+    nothingFound: "No matching ingredients.",
+    addedToKitchen: "Added to your kitchen!",
   },
   chef: {
     title: "Chat with Head Chef",
